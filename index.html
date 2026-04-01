@@ -8,6 +8,11 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <!-- ✅ Firebase SDK (v9 compat mode — works in plain HTML) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
     :root{
@@ -29,6 +34,8 @@
       --danger-glow:rgba(255,104,107,0.2);
       --whatsapp:#4ECB71;
       --whatsapp-glow:rgba(78,203,113,0.25);
+      --firebase:#FF6D00;
+      --firebase-glow:rgba(255,109,0,0.2);
       --text-primary:#121212;
       --text-secondary:#6B6B6B;
       --text-tertiary:#A5A5A5;
@@ -70,7 +77,7 @@
     .nav-item:hover{background:var(--bg-surface-hover);color:var(--text-primary);}
     .nav-item.active{background:var(--primary);color:var(--text-inverse);box-shadow:0 4px 16px rgba(0,0,0,0.15);}
     .nav-badge{background:var(--danger);color:white;font-size:11px;font-weight:700;padding:2px 6px;border-radius:var(--radius-full);}
-    .user-actions{display:flex;gap:12px;}
+    .user-actions{display:flex;gap:12px;align-items:center;}
     .search-box{position:relative;width:300px;}
     .search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--text-secondary);}
     .search-input{width:100%;padding:12px 20px 12px 48px;background:white;border:none;border-radius:var(--radius-full);font-size:15px;box-shadow:var(--shadow-sm);outline:none;}
@@ -121,6 +128,8 @@
     .btn-danger:hover{box-shadow:0 8px 24px var(--danger-glow);transform:translateY(-2px);}
     .btn-ghost{background:transparent;color:var(--text-secondary);border:none;}
     .btn-ghost:hover{background:rgba(0,0,0,0.05);color:var(--text-primary);}
+    .btn-firebase{background:var(--firebase);color:white;}
+    .btn-firebase:hover{box-shadow:0 8px 24px var(--firebase-glow);transform:translateY(-2px);}
     .btn-copy{background:rgba(0,0,0,0.05);color:var(--text-primary);padding:8px 16px;font-size:13px;border-radius:var(--radius-full);border:none;cursor:pointer;transition:all 200ms;}
     .btn-copy:hover{background:var(--primary);color:white;}
     .btn-copy.copied{background:var(--accent-sage)!important;color:#436334!important;}
@@ -169,7 +178,6 @@
     @keyframes toastIn{from{opacity:0;transform:translateY(40px) scale(0.9);}to{opacity:1;transform:translateY(0) scale(1);}}
     @keyframes toastOut{to{opacity:0;transform:translateY(40px) scale(0.9);}}
     .empty-state{text-align:center;padding:80px 20px;opacity:0.6;}
-    .section-title{font-size:20px;font-weight:600;margin-bottom:20px;}
     .mt-lg{margin-top:20px;}
     .mt-xl{margin-top:32px;}
     .mb-lg{margin-bottom:20px;}
@@ -178,6 +186,60 @@
     .ocr-progress-bar{width:100%;height:8px;background:var(--bg-primary);border-radius:var(--radius-full);overflow:hidden;}
     .ocr-progress-fill{height:100%;width:0%;background:var(--primary);transition:width 0.3s;}
     .ocr-progress-label{display:flex;justify-content:space-between;font-size:14px;font-weight:600;margin-bottom:8px;}
+    /* OTP */
+    .phone-row{display:flex;gap:10px;align-items:flex-end;}
+    .phone-row .form-input{flex:1;}
+    .otp-send-btn{white-space:nowrap;padding:16px 20px;border-radius:var(--radius-lg);background:var(--whatsapp);color:white;border:none;font-size:14px;font-weight:700;cursor:pointer;transition:all var(--transition-base);display:flex;align-items:center;gap:6px;}
+    .otp-send-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--whatsapp-glow);}
+    .otp-send-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+    .otp-verify-box{margin-top:12px;background:var(--bg-primary);border-radius:var(--radius-lg);padding:16px 20px;display:none;animation:scaleIn 0.4s var(--ease-spring);}
+    .otp-verify-box.active{display:block;}
+    .otp-verify-row{display:flex;gap:10px;align-items:center;}
+    .otp-input{flex:1;padding:14px 20px;background:white;border:2px solid var(--border);border-radius:var(--radius-lg);font-size:20px;font-weight:700;letter-spacing:8px;text-align:center;outline:none;transition:all var(--transition-base);}
+    .otp-input:focus{border-color:var(--primary);box-shadow:0 4px 16px rgba(0,0,0,0.08);}
+    .otp-verify-btn{padding:14px 24px;border-radius:var(--radius-lg);background:var(--primary);color:white;border:none;font-size:14px;font-weight:700;cursor:pointer;transition:all var(--transition-base);}
+    .otp-verify-btn:hover{transform:translateY(-2px);}
+    .otp-status{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;margin-top:8px;}
+    .otp-status.success{color:var(--success);}
+    .otp-status.error{color:var(--danger);}
+    .verified-badge{display:inline-flex;align-items:center;gap:6px;background:var(--accent-lime);color:#4C610A;font-size:13px;font-weight:700;padding:6px 14px;border-radius:var(--radius-full);}
+    .otp-hint{font-size:12px;color:var(--text-tertiary);margin-top:6px;}
+    .otp-timer{font-size:12px;color:var(--text-secondary);font-weight:600;}
+
+    /* ===== FIREBASE SETUP PANEL ===== */
+    .firebase-setup-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;}
+    .firebase-setup-modal{background:white;border-radius:var(--radius-xl);padding:48px;max-width:640px;width:100%;box-shadow:0 40px 80px rgba(0,0,0,0.2);animation:scaleIn 0.5s var(--ease-spring);}
+    .firebase-logo{font-size:48px;margin-bottom:16px;}
+    .firebase-title{font-size:28px;font-weight:700;letter-spacing:-1px;margin-bottom:8px;}
+    .firebase-subtitle{color:var(--text-secondary);margin-bottom:32px;font-size:16px;line-height:1.6;}
+    .setup-steps{display:flex;flex-direction:column;gap:12px;margin-bottom:32px;}
+    .setup-step{display:flex;gap:16px;align-items:flex-start;padding:16px 20px;background:var(--bg-primary);border-radius:var(--radius-lg);}
+    .step-num{width:28px;height:28px;border-radius:var(--radius-full);background:var(--primary);color:white;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+    .step-text{font-size:14px;font-weight:500;line-height:1.6;}
+    .step-text a{color:var(--firebase);font-weight:700;text-decoration:underline;}
+    .config-form{display:flex;flex-direction:column;gap:12px;margin-bottom:24px;}
+    .config-input{width:100%;padding:14px 20px;background:var(--bg-primary);border:1px solid transparent;border-radius:var(--radius-lg);font-size:14px;font-family:monospace;outline:none;transition:all var(--transition-base);}
+    .config-input:focus{background:white;border-color:var(--firebase);box-shadow:0 0 0 3px var(--firebase-glow);}
+    .config-input::placeholder{color:var(--text-tertiary);}
+    .firebase-connect-btn{width:100%;padding:18px;border-radius:var(--radius-full);background:var(--firebase);color:white;font-size:16px;font-weight:700;border:none;cursor:pointer;transition:all var(--transition-base);}
+    .firebase-connect-btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px var(--firebase-glow);}
+    .firebase-connect-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+    .skip-link{text-align:center;margin-top:16px;font-size:14px;color:var(--text-secondary);}
+    .skip-link button{background:none;border:none;color:var(--text-secondary);text-decoration:underline;cursor:pointer;font-size:14px;}
+
+    /* ===== CONNECTION STATUS DOT ===== */
+    .db-status{display:flex;align-items:center;gap:8px;padding:8px 16px;background:white;border-radius:var(--radius-full);box-shadow:var(--shadow-sm);font-size:13px;font-weight:600;color:var(--text-secondary);}
+    .db-dot{width:8px;height:8px;border-radius:50%;background:var(--text-tertiary);transition:background 0.5s;}
+    .db-dot.connected{background:var(--success);box-shadow:0 0 0 3px var(--success-glow);animation:pulse 2s infinite;}
+    .db-dot.error{background:var(--danger);}
+    .db-dot.local{background:var(--warning);}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 3px var(--success-glow);}50%{box-shadow:0 0 0 6px rgba(99,174,102,0);}}
+
+    /* ===== LOADING SKELETON ===== */
+    .skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius-full);}
+    @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+    .skeleton-row{height:72px;margin-bottom:10px;}
+
     @media(max-width:1024px){.order-detail-layout,.stats-grid{grid-template-columns:1fr 1fr;}}
     @media(max-width:768px){
       .app-phone-container{margin:0;border-radius:0;min-height:100vh;}
@@ -189,10 +251,49 @@
       .order-row-meta{margin:10px 0;justify-content:center;width:100%;gap:12px;}
       .field-row{flex-direction:column;align-items:flex-start;border-radius:var(--radius-lg);}
       .field-label{width:auto;}
+      .firebase-setup-modal{padding:28px;}
+      .firebase-title{font-size:22px;}
+      .db-status span.db-label{display:none;}
     }
   </style>
 </head>
 <body>
+
+<!-- ===== FIREBASE SETUP MODAL ===== -->
+<div class="firebase-setup-overlay" id="firebase-setup-overlay">
+  <div class="firebase-setup-modal">
+    <div class="firebase-logo">🔥</div>
+    <h2 class="firebase-title">Connect to Firebase</h2>
+    <p class="firebase-subtitle">Your data will be saved permanently in the cloud — never lost, accessible from any device.</p>
+
+    <div class="setup-steps">
+      <div class="setup-step">
+        <div class="step-num">1</div>
+        <div class="step-text">Go to <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → Create project → Name it "cyber-cafe"</div>
+      </div>
+      <div class="setup-step">
+        <div class="step-num">2</div>
+        <div class="step-text">Click <strong>Firestore Database</strong> → <strong>Create database</strong> → Choose <strong>Test mode</strong> → Select <em>asia-south1 (Mumbai)</em></div>
+      </div>
+      <div class="setup-step">
+        <div class="step-num">3</div>
+        <div class="step-text">Go to <strong>Project Settings</strong> → <strong>Add Web App</strong> → Copy the <code>firebaseConfig</code> values and paste below</div>
+      </div>
+    </div>
+
+    <div class="config-form">
+      <input class="config-input" id="cfg-apikey" placeholder="apiKey  (e.g. AIzaSy...)">
+      <input class="config-input" id="cfg-authDomain" placeholder="authDomain  (e.g. cyber-cafe-xxxx.firebaseapp.com)">
+      <input class="config-input" id="cfg-projectId" placeholder="projectId  (e.g. cyber-cafe-xxxx)">
+    </div>
+
+    <button class="firebase-connect-btn" id="firebase-connect-btn" onclick="connectFirebase()">🔥 Connect Firebase</button>
+
+    <div class="skip-link">
+      <button onclick="skipToLocal()">Skip for now — use local storage (data may be lost)</button>
+    </div>
+  </div>
+</div>
 
 <div class="app-layout">
   <main class="app-phone-container">
@@ -210,6 +311,10 @@
         <button class="nav-item" data-view="new-order"><span>New Order</span></button>
       </nav>
       <div class="user-actions">
+        <div class="db-status" id="db-status-indicator">
+          <span class="db-dot" id="db-dot"></span>
+          <span class="db-label" id="db-label">Connecting...</span>
+        </div>
         <div class="search-box">
           <span class="search-icon">🔍</span>
           <input type="text" class="search-input" id="search-input" placeholder="Search orders...">
@@ -226,15 +331,19 @@
           <p class="page-subtitle">Your form-filling analytics and active queue.</p>
         </div>
         <div class="stats-grid">
-          <div class="stat-pill accent-sage"><div class="stat-icon-wrapper">📦</div><div class="stat-value" id="stat-total">0</div><div class="stat-label">Total Orders</div></div>
-          <div class="stat-pill"><div class="stat-icon-wrapper">⏳</div><div class="stat-value" id="stat-pending">0</div><div class="stat-label">Pending</div></div>
-          <div class="stat-pill accent-yellow"><div class="stat-icon-wrapper">📅</div><div class="stat-value" id="stat-today">0</div><div class="stat-label">Today</div></div>
-          <div class="stat-pill accent-lime"><div class="stat-icon-wrapper">✨</div><div class="stat-value" id="stat-completed">0</div><div class="stat-label">Completed</div></div>
+          <div class="stat-pill accent-sage"><div class="stat-icon-wrapper">📦</div><div class="stat-value" id="stat-total">—</div><div class="stat-label">Total Orders</div></div>
+          <div class="stat-pill"><div class="stat-icon-wrapper">⏳</div><div class="stat-value" id="stat-pending">—</div><div class="stat-label">Pending</div></div>
+          <div class="stat-pill accent-yellow"><div class="stat-icon-wrapper">📅</div><div class="stat-value" id="stat-today">—</div><div class="stat-label">Today</div></div>
+          <div class="stat-pill accent-lime"><div class="stat-icon-wrapper">✨</div><div class="stat-value" id="stat-completed">—</div><div class="stat-label">Completed</div></div>
         </div>
         <div class="orders-section-header mt-xl">
           <h2>Active Queue</h2>
         </div>
-        <div class="orders-list" id="orders-grid"></div>
+        <div class="orders-list" id="orders-grid">
+          <div class="skeleton skeleton-row"></div>
+          <div class="skeleton skeleton-row" style="opacity:0.7;"></div>
+          <div class="skeleton skeleton-row" style="opacity:0.4;"></div>
+        </div>
         <div class="fab-container">
           <button class="fab-btn" onclick="showView('new-order')" title="New Order">+</button>
         </div>
@@ -255,65 +364,51 @@
             </div>
             <div class="form-group">
               <label class="form-label">WhatsApp Number *</label>
-              <input type="tel" class="form-input" id="input-phone" placeholder="9876543210" required>
+              <div class="phone-row">
+                <input type="tel" class="form-input" id="input-phone" placeholder="9876543210" maxlength="10" oninput="onPhoneInput(this)">
+                <button type="button" class="otp-send-btn" id="otp-send-btn" onclick="sendOtp()" disabled>💬 Send OTP</button>
+              </div>
+              <div class="otp-verify-box" id="otp-verify-box">
+                <div style="font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:10px;">Enter the 6-digit OTP sent to customer's WhatsApp:</div>
+                <div class="otp-verify-row">
+                  <input type="text" class="otp-input" id="otp-input" maxlength="6" placeholder="••••••" oninput="this.value=this.value.replace(/\D/g,'')">
+                  <button type="button" class="otp-verify-btn" onclick="verifyOtp()">Verify ✓</button>
+                </div>
+                <div class="otp-status" id="otp-status" style="display:none;"></div>
+                <div class="otp-hint" id="otp-timer"></div>
+              </div>
+              <div id="phone-verified-badge" style="display:none;margin-top:10px;">
+                <span class="verified-badge">✅ Number Verified</span>
+              </div>
             </div>
           </div>
           <div class="form-group">
             <label class="form-label">Service Type</label>
             <select class="form-select" id="input-service">
               <optgroup label="── Engineering Entrance">
-                <option>JEE Main</option>
-                <option>JEE Advanced</option>
-                <option>MHT-CET (Engineering)</option>
-                <option>BITSAT</option>
-                <option>VITEEE</option>
-                <option>COMEDK</option>
+                <option>JEE Main</option><option>JEE Advanced</option><option>MHT-CET (Engineering)</option>
+                <option>BITSAT</option><option>VITEEE</option><option>COMEDK</option>
               </optgroup>
               <optgroup label="── Medical Entrance">
-                <option>NEET UG</option>
-                <option>NEET PG</option>
-                <option>AIIMS PG</option>
-                <option>MHT-CET (Pharmacy)</option>
+                <option>NEET UG</option><option>NEET PG</option><option>AIIMS PG</option><option>MHT-CET (Pharmacy)</option>
               </optgroup>
               <optgroup label="── Law Entrance">
-                <option>CLAT</option>
-                <option>AILET</option>
-                <option>MH-CET Law</option>
+                <option>CLAT</option><option>AILET</option><option>MH-CET Law</option>
               </optgroup>
               <optgroup label="── Management Entrance">
-                <option>CAT</option>
-                <option>MAT</option>
-                <option>CMAT</option>
-                <option>XAT</option>
-                <option>SNAP</option>
+                <option>CAT</option><option>MAT</option><option>CMAT</option><option>XAT</option><option>SNAP</option>
               </optgroup>
               <optgroup label="── Government / SSC">
-                <option>SSC CGL</option>
-                <option>SSC CHSL</option>
-                <option>SSC MTS</option>
-                <option>SSC GD</option>
-                <option>IBPS PO</option>
-                <option>IBPS Clerk</option>
-                <option>SBI PO</option>
-                <option>SBI Clerk</option>
-                <option>RRB NTPC</option>
-                <option>RRB Group D</option>
-                <option>MPSC</option>
-                <option>UPSC CSE</option>
+                <option>SSC CGL</option><option>SSC CHSL</option><option>SSC MTS</option><option>SSC GD</option>
+                <option>IBPS PO</option><option>IBPS Clerk</option><option>SBI PO</option><option>SBI Clerk</option>
+                <option>RRB NTPC</option><option>RRB Group D</option><option>MPSC</option><option>UPSC CSE</option>
               </optgroup>
               <optgroup label="── Defence">
-                <option>NDA</option>
-                <option>CDS</option>
-                <option>AFCAT</option>
+                <option>NDA</option><option>CDS</option><option>AFCAT</option>
               </optgroup>
               <optgroup label="── Other Services">
-                <option>Exam Form</option>
-                <option>Scholarship</option>
-                <option>Admission Form</option>
-                <option>PAN Card</option>
-                <option>Passport</option>
-                <option>Voter ID</option>
-                <option>Driving License</option>
+                <option>Exam Form</option><option>Scholarship</option><option>Admission Form</option>
+                <option>PAN Card</option><option>Passport</option><option>Voter ID</option><option>Driving License</option>
               </optgroup>
             </select>
           </div>
@@ -323,7 +418,7 @@
           </div>
           <div style="display:flex;justify-content:flex-end;gap:14px;margin-top:28px;">
             <button type="button" class="btn btn-secondary" onclick="showView('dashboard')">Cancel</button>
-            <button type="submit" class="btn btn-primary" style="font-size:16px;padding:14px 48px;">Create Request</button>
+            <button type="submit" class="btn btn-primary" style="font-size:16px;padding:14px 48px;" id="create-order-btn">Create Request</button>
           </div>
         </form>
       </section>
@@ -344,83 +439,246 @@
 <div class="toast-container" id="toast-container"></div>
 
 <script>
-  /* ========== STORAGE ========== */
+  /* =========================================
+     🔥 FIREBASE + FALLBACK STORAGE LAYER
+     ========================================= */
   const STORAGE_KEY = 'cybercafe_orders';
+  const CONFIG_KEY  = 'cybercafe_firebase_config';
+
+  let db = null;               // Firestore instance (null = use localStorage)
+  let useFirebase = false;     // Are we connected?
+  let _liveOrders = [];        // In-memory cache (kept in sync)
+  let _unsubscribe = null;     // Firestore live listener cleanup
+
   let uploadedFiles = [];
   let currentOrderId = null;
 
-  function getOrders(){try{const d=localStorage.getItem(STORAGE_KEY);return d?JSON.parse(d):[];}catch{return[];}}
-  function saveOrders(o){localStorage.setItem(STORAGE_KEY,JSON.stringify(o));}
-  function getById(id){return getOrders().find(o=>o.id===id)||null;}
-  function genId(){return'ord_'+Date.now().toString(36)+'_'+Math.random().toString(36).substr(2,6);}
+  /* ---- Firebase Init ---- */
+  function connectFirebase() {
+    const apiKey     = document.getElementById('cfg-apikey').value.trim();
+    const authDomain = document.getElementById('cfg-authDomain').value.trim();
+    const projectId  = document.getElementById('cfg-projectId').value.trim();
 
-  function createOrder(data){
-    const orders=getOrders();
-    const o={id:genId(),studentName:data.studentName||'',phone:data.phone||'',service:data.service||'Exam Form',notes:data.notes||'',status:'pending',extractedFields:{},createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
-    orders.unshift(o);saveOrders(orders);return o;
-  }
-  function updateOrder(id,updates){
-    const orders=getOrders();const idx=orders.findIndex(o=>o.id===id);
-    if(idx===-1)return null;
-    orders[idx]={...orders[idx],...updates,updatedAt:new Date().toISOString()};
-    saveOrders(orders);return orders[idx];
-  }
-  function deleteOrder(id){saveOrders(getOrders().filter(o=>o.id!==id));}
-  function getStats(){
-    const o=getOrders();const today=new Date().toDateString();
-    return{total:o.length,today:o.filter(x=>new Date(x.createdAt).toDateString()===today).length,pending:o.filter(x=>x.status==='pending').length,completed:o.filter(x=>x.status==='completed').length};
+    if (!apiKey || !authDomain || !projectId) {
+      showToast('Please fill in all three fields', 'error'); return;
+    }
+
+    const btn = document.getElementById('firebase-connect-btn');
+    btn.disabled = true; btn.textContent = '⏳ Connecting...';
+
+    try {
+      // If already initialized, delete it first
+      if (firebase.apps.length) firebase.app().delete().catch(()=>{});
+
+      const app = firebase.initializeApp({ apiKey, authDomain, projectId });
+      db = firebase.firestore(app);
+
+      // Test connectivity with a quick read
+      db.collection('orders').limit(1).get()
+        .then(() => {
+          useFirebase = true;
+          localStorage.setItem(CONFIG_KEY, JSON.stringify({ apiKey, authDomain, projectId }));
+          setDbStatus('connected', '☁️ Firebase');
+          document.getElementById('firebase-setup-overlay').style.display = 'none';
+          showToast('🔥 Connected to Firebase! Data is now permanent.', 'success', 5000);
+          startLiveListener();
+        })
+        .catch(err => {
+          btn.disabled = false; btn.textContent = '🔥 Connect Firebase';
+          showToast('Connection failed: ' + err.message, 'error', 6000);
+        });
+    } catch(err) {
+      btn.disabled = false; btn.textContent = '🔥 Connect Firebase';
+      showToast('Error: ' + err.message, 'error', 6000);
+    }
   }
 
-  /* ========== TOAST ========== */
-  function showToast(msg,type='info',dur=3000){
-    const c=document.getElementById('toast-container');
-    const t=document.createElement('div');
-    t.className=`toast toast-${type}`;
-    const icons={success:'✓',error:'✗',info:'ℹ'};
-    t.innerHTML=`${icons[type]||'ℹ'} ${msg}`;
-    c.appendChild(t);
-    setTimeout(()=>{t.classList.add('removing');setTimeout(()=>t.remove(),300);},dur);
-  }
-
-  /* ========== UTILS ========== */
-  function getInitials(name){return(name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();}
-  function esc(str){const d=document.createElement('div');d.textContent=str;return d.innerHTML;}
-  function slugify(str){return str.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');}
-
-  /* ========== NAVIGATION ========== */
-  function showView(name,data){
-    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-    const an=document.querySelector(`.nav-item[data-view="${name==='order-detail'?'dashboard':name}"]`);
-    if(an)an.classList.add('active');
-    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-    const t=document.getElementById(`${name}-view`);
-    if(t){void t.offsetWidth;t.classList.add('active');}
-    if(name==='dashboard')renderDashboard();
-    else if(name==='new-order'){const f=document.getElementById('new-order-form');if(f)f.reset();}
-    else if(name==='order-detail'&&data){currentOrderId=data.orderId;renderOrderDetail(data.orderId);}
+  function skipToLocal() {
+    useFirebase = false;
+    setDbStatus('local', '💾 Local');
+    document.getElementById('firebase-setup-overlay').style.display = 'none';
+    showToast('Using local storage. Data stored in this browser only.', 'info', 4000);
+    renderDashboard();
     updateBadge();
   }
 
-  function updateBadge(){
-    const s=getStats();const b=document.getElementById('pending-badge');
-    if(b){b.textContent=s.pending;b.style.display=s.pending>0?'inline':'none';}
+  /* Auto-reconnect if config saved */
+  function tryAutoConnect() {
+    const saved = localStorage.getItem(CONFIG_KEY);
+    if (!saved) { return; }
+    try {
+      const cfg = JSON.parse(saved);
+      document.getElementById('cfg-apikey').value     = cfg.apiKey     || '';
+      document.getElementById('cfg-authDomain').value = cfg.authDomain || '';
+      document.getElementById('cfg-projectId').value  = cfg.projectId  || '';
+      connectFirebase();
+    } catch(e) {
+      // Bad saved config — show setup screen
+    }
   }
 
-  /* ========== DASHBOARD ========== */
-  function renderDashboard(){
-    const s=getStats();const orders=getOrders();
-    document.getElementById('stat-total').textContent=s.total;
-    document.getElementById('stat-pending').textContent=s.pending;
-    document.getElementById('stat-today').textContent=s.today;
-    document.getElementById('stat-completed').textContent=s.completed;
-    const grid=document.getElementById('orders-grid');
-    if(orders.length===0){
-      grid.innerHTML=`<div class="empty-state"><div style="font-size:56px;margin-bottom:16px;">📋</div><h3 style="font-size:22px;margin-bottom:8px;">No orders yet</h3><p style="color:var(--text-secondary);margin-bottom:24px;">Create your first order to get started</p><button class="btn btn-primary" onclick="showView('new-order')">➕ Create First Order</button></div>`;
+  /* ---- Live Firestore Listener ---- */
+  function startLiveListener() {
+    if (_unsubscribe) _unsubscribe();
+    _unsubscribe = db.collection('orders')
+      .orderBy('createdAt', 'desc')
+      .onSnapshot(snapshot => {
+        _liveOrders = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderDashboard();
+        updateBadge();
+      }, err => {
+        setDbStatus('error', '⚠️ Offline');
+        showToast('Firestore sync error: ' + err.message, 'error');
+      });
+  }
+
+  /* ---- Status indicator ---- */
+  function setDbStatus(state, label) {
+    const dot   = document.getElementById('db-dot');
+    const lbl   = document.getElementById('db-label');
+    dot.className = 'db-dot ' + state;
+    lbl.textContent = label;
+  }
+
+  /* =========================================
+     CRUD — auto-routes to Firebase or Local
+     ========================================= */
+  function getOrders() {
+    if (useFirebase) return _liveOrders;
+    try { const d = localStorage.getItem(STORAGE_KEY); return d ? JSON.parse(d) : []; } catch { return []; }
+  }
+
+  function saveOrdersLocal(o) { localStorage.setItem(STORAGE_KEY, JSON.stringify(o)); }
+
+  function getById(id) { return getOrders().find(o => o.id === id) || null; }
+
+  function genId() { return 'ord_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2,6); }
+
+  async function createOrder(data) {
+    const o = {
+      studentName: data.studentName || '',
+      phone: data.phone || '',
+      service: data.service || 'Exam Form',
+      notes: data.notes || '',
+      status: 'pending',
+      extractedFields: {},
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    if (useFirebase) {
+      const id = genId();
+      await db.collection('orders').doc(id).set(o);
+      return { id, ...o };
+    } else {
+      o.id = genId();
+      const orders = getOrders();
+      orders.unshift(o);
+      saveOrdersLocal(orders);
+      return o;
+    }
+  }
+
+  async function updateOrder(id, updates) {
+    if (useFirebase) {
+      const upd = { ...updates, updatedAt: new Date().toISOString() };
+      await db.collection('orders').doc(id).update(upd);
+      // Update local cache immediately for snappy UI
+      const idx = _liveOrders.findIndex(o => o.id === id);
+      if (idx !== -1) _liveOrders[idx] = { ..._liveOrders[idx], ...upd };
+      return _liveOrders[idx];
+    } else {
+      const orders = getOrders();
+      const idx = orders.findIndex(o => o.id === id);
+      if (idx === -1) return null;
+      orders[idx] = { ...orders[idx], ...updates, updatedAt: new Date().toISOString() };
+      saveOrdersLocal(orders);
+      return orders[idx];
+    }
+  }
+
+  async function deleteOrder(id) {
+    if (useFirebase) {
+      await db.collection('orders').doc(id).delete();
+    } else {
+      saveOrdersLocal(getOrders().filter(o => o.id !== id));
+    }
+  }
+
+  function getStats() {
+    const o = getOrders();
+    const today = new Date().toDateString();
+    return {
+      total: o.length,
+      today: o.filter(x => new Date(x.createdAt).toDateString() === today).length,
+      pending: o.filter(x => x.status === 'pending').length,
+      completed: o.filter(x => x.status === 'completed').length
+    };
+  }
+
+  /* =========================================
+     TOAST
+     ========================================= */
+  function showToast(msg, type='info', dur=3000) {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast toast-${type}`;
+    const icons = { success:'✓', error:'✗', info:'ℹ' };
+    t.innerHTML = `${icons[type]||'ℹ'} ${msg}`;
+    c.appendChild(t);
+    setTimeout(() => { t.classList.add('removing'); setTimeout(() => t.remove(), 300); }, dur);
+  }
+
+  /* =========================================
+     UTILS
+     ========================================= */
+  function getInitials(name) { return (name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase(); }
+  function esc(str) { const d=document.createElement('div'); d.textContent=str; return d.innerHTML; }
+  function slugify(str) { return str.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
+
+  /* =========================================
+     NAVIGATION
+     ========================================= */
+  function showView(name, data) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const an = document.querySelector(`.nav-item[data-view="${name==='order-detail'?'dashboard':name}"]`);
+    if (an) an.classList.add('active');
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    const t = document.getElementById(`${name}-view`);
+    if (t) { void t.offsetWidth; t.classList.add('active'); }
+    if (name === 'dashboard') renderDashboard();
+    else if (name === 'new-order') {
+      resetNewOrderForm();
+    }
+    else if (name === 'order-detail' && data) { currentOrderId = data.orderId; renderOrderDetail(data.orderId); }
+    updateBadge();
+  }
+
+  function updateBadge() {
+    const s = getStats();
+    const b = document.getElementById('pending-badge');
+    if (b) { b.textContent = s.pending; b.style.display = s.pending > 0 ? 'inline' : 'none'; }
+  }
+
+  /* =========================================
+     DASHBOARD
+     ========================================= */
+  function renderDashboard() {
+    const s = getStats();
+    const orders = getOrders();
+    document.getElementById('stat-total').textContent = s.total;
+    document.getElementById('stat-pending').textContent = s.pending;
+    document.getElementById('stat-today').textContent = s.today;
+    document.getElementById('stat-completed').textContent = s.completed;
+
+    const grid = document.getElementById('orders-grid');
+    if (orders.length === 0) {
+      grid.innerHTML = `<div class="empty-state"><div style="font-size:56px;margin-bottom:16px;">📋</div><h3 style="font-size:22px;margin-bottom:8px;">No orders yet</h3><p style="color:var(--text-secondary);margin-bottom:24px;">Create your first order to get started</p><button class="btn btn-primary" onclick="showView('new-order')">➕ Create First Order</button></div>`;
       return;
     }
-    grid.innerHTML=orders.map((o,i)=>{
-      const date=new Date(o.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
-      return`<div class="order-row" onclick="showView('order-detail',{orderId:'${o.id}'})" style="animation-delay:${i*40}ms">
+    grid.innerHTML = orders.map((o, i) => {
+      const date = new Date(o.createdAt).toLocaleDateString('en-IN', { day:'numeric', month:'short' });
+      return `<div class="order-row" onclick="showView('order-detail',{orderId:'${o.id}'})" style="animation-delay:${i*40}ms">
         <div class="order-row-avatar">${getInitials(o.studentName)}</div>
         <div class="order-row-info"><div class="order-row-name">${esc(o.studentName)}</div><div class="order-row-service">${esc(o.service)}</div></div>
         <div class="order-row-meta"><span>📅 ${date}</span><span>📱 ${o.phone?'···'+o.phone.slice(-4):'—'}</span></div>
@@ -429,46 +687,134 @@
     }).join('');
   }
 
-  /* ========== NEW ORDER ========== */
-  function handleCreateOrder(e){
-    e.preventDefault();
-    const name=document.getElementById('input-student-name').value.trim();
-    const phone=document.getElementById('input-phone').value.trim();
-    const service=document.getElementById('input-service').value;
-    const notes=document.getElementById('input-notes').value.trim();
-    if(!name){showToast('Please enter student name','error');return;}
-    if(!phone||phone.length<10){showToast('Please enter a valid phone number','error');return;}
-    const o=createOrder({studentName:name,phone,service,notes});
-    showToast(`Order created for ${name}!`,'success');
-    showView('order-detail',{orderId:o.id});
+  /* =========================================
+     OTP VERIFICATION
+     ========================================= */
+  let _otp = null, _otpPhone = null, _otpVerified = false, _otpTimer = null, _otpExpiry = null;
+
+  function resetNewOrderForm() {
+    const f = document.getElementById('new-order-form');
+    if (f) f.reset();
+    _otp = null; _otpVerified = false; _otpPhone = null;
+    clearInterval(_otpTimer);
+    document.getElementById('phone-verified-badge').style.display = 'none';
+    document.getElementById('otp-verify-box').classList.remove('active');
+    document.getElementById('otp-send-btn').disabled = true;
+    document.getElementById('otp-send-btn').textContent = '💬 Send OTP';
+    const st = document.getElementById('otp-status'); if (st) st.style.display = 'none';
+    const tm = document.getElementById('otp-timer'); if (tm) tm.textContent = '';
   }
 
-  /* ========== WHATSAPP ========== */
-  function getDocsArrayForService(service){
-    const m={
-      // Engineering
-      'JEE Main':['Aadhaar Card (Front & Back)','Passport Size Photo (white background, recent)','Class 10th Marksheet (DOB proof)','Class 12th Marksheet or School Appearing Certificate','Scanned Signature on white paper','Category Certificate — SC/ST/OBC-NCL/EWS (if applicable)','PwD Certificate (if applicable)'],
-      'JEE Advanced':['JEE Main Admit Card & Scorecard','Aadhaar Card (Front & Back)','Passport Size Photo (white background)','Class 10th Marksheet','Class 12th Marksheet','Scanned Signature on white paper','Category Certificate (if applicable)','PwD Certificate (if applicable)','OCI/PIO Card (for foreign nationals)'],
+  function onPhoneInput(el) {
+    const v = el.value.replace(/\D/g,'').substring(0,10);
+    el.value = v;
+    _otpVerified = false;
+    document.getElementById('phone-verified-badge').style.display = 'none';
+    document.getElementById('otp-verify-box').classList.remove('active');
+    document.getElementById('otp-send-btn').disabled = v.length !== 10;
+    _otp = null;
+  }
+
+  function sendOtp() {
+    const phone = document.getElementById('input-phone').value.trim();
+    if (phone.length !== 10) { showToast('Enter a valid 10-digit number','error'); return; }
+    _otp = Math.floor(100000 + Math.random() * 900000).toString();
+    _otpPhone = phone;
+    _otpVerified = false;
+    const fullPhone = '91' + phone;
+    const msg = encodeURIComponent(`🔐 *CYBER CAFE — OTP Verification*\n\nYour one-time password is:\n\n*${_otp}*\n\nValid for 5 minutes. Do not share with anyone.\n\n— Team CYBER CAFE`);
+    window.open(`https://wa.me/${fullPhone}?text=${msg}`, '_blank');
+    document.getElementById('otp-verify-box').classList.add('active');
+    document.getElementById('otp-input').value = '';
+    document.getElementById('otp-status').style.display = 'none';
+    document.getElementById('otp-send-btn').textContent = '🔄 Resend OTP';
+    showToast('OTP sent via WhatsApp!', 'success');
+    _otpExpiry = Date.now() + 5 * 60 * 1000;
+    clearInterval(_otpTimer);
+    _otpTimer = setInterval(() => {
+      const left = Math.max(0, _otpExpiry - Date.now());
+      const m = Math.floor(left / 60000), s = Math.floor((left % 60000) / 1000);
+      const el = document.getElementById('otp-timer');
+      if (el) el.textContent = left > 0 ? `⏱ OTP expires in ${m}:${s.toString().padStart(2,'0')}` : '⚠️ OTP expired. Please resend.';
+      if (left === 0) { clearInterval(_otpTimer); _otp = null; }
+    }, 1000);
+  }
+
+  function verifyOtp() {
+    const entered = document.getElementById('otp-input').value.trim();
+    const statusEl = document.getElementById('otp-status');
+    statusEl.style.display = 'flex';
+    if (!_otp) { statusEl.className = 'otp-status error'; statusEl.innerHTML = '⚠️ OTP expired. Please resend.'; return; }
+    if (entered === _otp) {
+      _otpVerified = true;
+      clearInterval(_otpTimer);
+      statusEl.className = 'otp-status success';
+      statusEl.innerHTML = '✅ Phone number verified successfully!';
+      document.getElementById('phone-verified-badge').style.display = 'block';
+      document.getElementById('otp-verify-box').classList.remove('active');
+      showToast('Phone verified! ✅', 'success');
+    } else {
+      statusEl.className = 'otp-status error';
+      statusEl.innerHTML = '❌ Wrong OTP. Please try again.';
+      document.getElementById('otp-input').value = '';
+      document.getElementById('otp-input').focus();
+    }
+  }
+
+  /* =========================================
+     NEW ORDER
+     ========================================= */
+  async function handleCreateOrder(e) {
+    e.preventDefault();
+    const name    = document.getElementById('input-student-name').value.trim();
+    const phone   = document.getElementById('input-phone').value.trim();
+    const service = document.getElementById('input-service').value;
+    const notes   = document.getElementById('input-notes').value.trim();
+    if (!name) { showToast('Please enter student name', 'error'); return; }
+    if (!phone || phone.length < 10) { showToast('Please enter a valid phone number', 'error'); return; }
+    if (!_otpVerified) {
+      showToast('Please verify the WhatsApp number with OTP first', 'error');
+      return;
+    }
+
+    const btn = document.getElementById('create-order-btn');
+    btn.disabled = true; btn.textContent = '⏳ Saving...';
+
+    try {
+      const o = await createOrder({ studentName: name, phone, service, notes });
+      _otpVerified = false; _otp = null;
+      showToast(`Order created for ${name}! ${useFirebase ? '☁️ Saved to Firebase' : '💾 Saved locally'}`, 'success');
+      showView('order-detail', { orderId: o.id });
+    } catch(err) {
+      showToast('Failed to save order: ' + err.message, 'error');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Create Request';
+    }
+  }
+
+  /* =========================================
+     WHATSAPP / DOCUMENT HELPERS
+     ========================================= */
+  function getDocsArrayForService(service) {
+    const m = {
+      'JEE Main':['Aadhaar Card (Front & Back)','Passport Size Photo (white background)','Class 10th Marksheet (DOB proof)','Class 12th Marksheet or Appearing Certificate','Scanned Signature on white paper','Category Certificate — SC/ST/OBC-NCL/EWS (if applicable)','PwD Certificate (if applicable)'],
+      'JEE Advanced':['JEE Main Admit Card & Scorecard','Aadhaar Card (Front & Back)','Passport Size Photo (white background)','Class 10th Marksheet','Class 12th Marksheet','Scanned Signature on white paper','Category Certificate (if applicable)','PwD Certificate (if applicable)'],
       'MHT-CET (Engineering)':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet','Class 12th Marksheet or Appearing Certificate','Scanned Signature','Domicile / Maharashtra Resident Certificate','Category Certificate (if applicable)'],
       'BITSAT':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet','Class 12th Marksheet or School Certificate','Scanned Signature'],
       'VITEEE':['Aadhaar Card / Passport','Passport Size Photo','Class 10th Marksheet','Class 12th Marksheet or School Certificate'],
       'COMEDK':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet','Class 12th Marksheet','Karnataka Domicile (if applicable)','Category Certificate (if applicable)'],
-      // Medical
-      'NEET UG':['Aadhaar Card (Front & Back)','Passport Size Photo (white background, recent)','Class 10th Marksheet (DOB proof)','Class 12th Marksheet or Appearing Certificate','Scanned Signature on white paper','Category Certificate — SC/ST/OBC/EWS (if applicable)','PwD Certificate (if applicable)'],
+      'NEET UG':['Aadhaar Card (Front & Back)','Passport Size Photo (white background)','Class 10th Marksheet (DOB proof)','Class 12th Marksheet or Appearing Certificate','Scanned Signature on white paper','Category Certificate — SC/ST/OBC/EWS (if applicable)','PwD Certificate (if applicable)'],
       'NEET PG':['MBBS Degree Certificate / Provisional','Aadhaar Card','Passport Size Photo','Medical Council Registration Certificate','Internship Completion Certificate','Category Certificate (if applicable)'],
       'AIIMS PG':['MBBS Degree Certificate / Provisional','Aadhaar Card','Passport Size Photo','Medical Council Registration','Internship Certificate'],
       'MHT-CET (Pharmacy)':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet','Class 12th Marksheet (PCB/PCM)','Domicile Certificate','Category Certificate (if applicable)'],
-      // Law
       'CLAT':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet','Class 12th Marksheet or Appearing Certificate','Scanned Signature','Category Certificate (if applicable)','PwD Certificate (if applicable)'],
       'AILET':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet','Class 12th Marksheet or School Certificate','Scanned Signature'],
       'MH-CET Law':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet','Class 12th Marksheet','Maharashtra Domicile Certificate','Category Certificate (if applicable)'],
-      // Management
       'CAT':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree / Provisional Certificate','Marksheets of all graduation years','Scanned Signature','Category Certificate (if applicable)'],
       'MAT':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree or Appearing Certificate','Marksheets'],
       'CMAT':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree / Provisional','Marksheets','Category Certificate (if applicable)'],
       'XAT':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree or Appearing Certificate','Scanned Signature'],
       'SNAP':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree or Appearing Certificate','Marksheets'],
-      // SSC / Banking
       'SSC CGL':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet & Certificate','Graduation Degree / Marksheets','Scanned Signature on white paper','Category Certificate (if applicable)','Ex-Serviceman / PwD Certificate (if applicable)'],
       'SSC CHSL':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet','Class 12th Marksheet & Certificate','Scanned Signature','Category Certificate (if applicable)'],
       'SSC MTS':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet & Passing Certificate','Scanned Signature','Category Certificate (if applicable)'],
@@ -481,11 +827,9 @@
       'RRB Group D':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet & Certificate','ITI / NCVT Certificate (if applicable)','Scanned Signature','Category Certificate (if applicable)'],
       'MPSC':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree / Marksheets','Domicile Certificate (Maharashtra)','Caste Certificate (if applicable)','Caste Validity Certificate','Non-Creamy Layer Certificate (OBC)','PwD Certificate (if applicable)'],
       'UPSC CSE':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree / Provisional Certificate','Class 10th Certificate (DOB proof)','Scanned Signature on white paper','Category Certificate (if applicable)','PwD Certificate (if applicable)','Ex-Serviceman Certificate (if applicable)'],
-      // Defence
       'NDA':['Aadhaar Card (Front & Back)','Passport Size Photo (white background)','Class 10th Marksheet (DOB proof)','Class 12th Marksheet or Appearing Certificate','Domicile / Resident Certificate','Scanned Signature'],
       'CDS':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree / Provisional Certificate','Class 10th & 12th Marksheets','Scanned Signature','Domicile Certificate'],
       'AFCAT':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree / Provisional Certificate','All Graduation Marksheets','Class 10th & 12th Marksheets','Scanned Signature'],
-      // General
       'Exam Form':['Aadhaar Card (Front & Back)','Passport Size Photo','Marksheet / Grade Card','Admit Card (if available)'],
       'Scholarship':['Aadhaar Card','Income Certificate','Marksheet','Bank Account Details (Passbook first page)','Passport Size Photo'],
       'Admission Form':['Aadhaar Card','10th & 12th Marksheet','Transfer Certificate','Migration Certificate','Passport Size Photo'],
@@ -494,19 +838,19 @@
       'Voter ID':['Aadhaar Card','Passport Size Photo','Address Proof'],
       'Driving License':['Aadhaar Card','Address Proof','Passport Size Photo','Age Proof (if applicable)']
     };
-    return m[service]||['Aadhaar Card','Passport Size Photo','Any relevant documents'];
+    return m[service] || ['Aadhaar Card','Passport Size Photo','Any relevant documents'];
   }
 
-  function getDocsForService(service){
-    return getDocsArrayForService(service).map((d,i)=>`${i+1}️⃣ ${d}`).join('\n');
+  function getDocsForService(service) {
+    return getDocsArrayForService(service).map((d, i) => `${i+1}️⃣ ${d}`).join('\n');
   }
 
-  function renderDocChecklist(service){
-    const docs=getDocsArrayForService(service);
-    return`<div class="detail-card" style="margin-bottom:28px;">
+  function renderDocChecklist(service) {
+    const docs = getDocsArrayForService(service);
+    return `<div class="detail-card" style="margin-bottom:28px;">
       <h3 class="section-title" style="margin-bottom:16px;">📋 Required Documents</h3>
       <div style="display:flex;flex-direction:column;gap:8px;">
-        ${docs.map((d,i)=>`
+        ${docs.map((d,i) => `
           <div style="display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg-primary);border-radius:var(--radius-full);font-size:14px;font-weight:500;">
             <span style="width:28px;height:28px;border-radius:50%;background:var(--accent-lime);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;">${i+1}</span>
             <span>${esc(d)}</span>
@@ -515,20 +859,22 @@
     </div>`;
   }
 
-  /* ========== ORDER DETAIL ========== */
-  function renderOrderDetail(orderId){
-    const order=getById(orderId);
-    if(!order){showToast('Order not found','error');showView('dashboard');return;}
-    uploadedFiles=[];
-    const phone=order.phone.replace(/[^0-9]/g,'');
-    const fullPhone=phone.startsWith('91')?phone:'91'+phone;
-    const docList=getDocsForService(order.service);
-    const waMsg=encodeURIComponent(`🏢 *CYBER CAFE — Document Request*\n\nHello *${order.studentName}*! 👋\n\nFor your *${order.service}* application, please send clear photos of:\n\n${docList}\n\n📌 Make sure all text is clearly visible in the photos.\n\nThank you!\n— Team CYBER CAFE`);
-    const waLink=`https://wa.me/${fullPhone}?text=${waMsg}`;
-    const defaultFields={'Full Name':'','Date of Birth':'','Aadhaar Number':'',"Father's Name":'','Gender':'','Address':'','Phone Number':'','PAN Number':''};
-    const fields={...defaultFields,...(order.extractedFields||{})};
+  /* =========================================
+     ORDER DETAIL
+     ========================================= */
+  function renderOrderDetail(orderId) {
+    const order = getById(orderId);
+    if (!order) { showToast('Order not found', 'error'); showView('dashboard'); return; }
+    uploadedFiles = [];
+    const phone = order.phone.replace(/[^0-9]/g, '');
+    const fullPhone = phone.startsWith('91') ? phone : '91' + phone;
+    const docList = getDocsForService(order.service);
+    const waMsg = encodeURIComponent(`🏢 *CYBER CAFE — Document Request*\n\nHello *${order.studentName}*! 👋\n\nFor your *${order.service}* application, please send clear photos of:\n\n${docList}\n\n📌 Make sure all text is clearly visible in the photos.\n\nThank you!\n— Team CYBER CAFE`);
+    const waLink = `https://wa.me/${fullPhone}?text=${waMsg}`;
+    const defaultFields = { 'Full Name':'', 'Date of Birth':'', 'Aadhaar Number':'', "Father's Name":'', 'Gender':'', 'Address':'', 'Phone Number':'', 'PAN Number':'' };
+    const fields = { ...defaultFields, ...(order.extractedFields || {}) };
 
-    document.getElementById('order-detail-content').innerHTML=`
+    document.getElementById('order-detail-content').innerHTML = `
       <div class="order-info-header">
         <div class="order-info-avatar">${getInitials(order.studentName)}</div>
         <div class="order-info-details">
@@ -540,7 +886,7 @@
           <button onclick="confirmDelete('${order.id}')" style="background:none;border:none;font-size:20px;cursor:pointer;padding:8px;" title="Delete">🗑️</button>
         </div>
       </div>
-      ${order.notes?`<div class="detail-card" style="margin-bottom:28px;padding:20px 28px;"><strong>📝 Notes:</strong> ${esc(order.notes)}</div>`:''}
+      ${order.notes ? `<div class="detail-card" style="margin-bottom:28px;padding:20px 28px;"><strong>📝 Notes:</strong> ${esc(order.notes)}</div>` : ''}
       ${renderDocChecklist(order.service)}
       <div style="text-align:center;margin-bottom:36px;">
         <a href="${waLink}" target="_blank" class="btn btn-whatsapp" style="font-size:16px;padding:16px 36px;box-shadow:0 12px 32px rgba(78,203,113,0.4);text-decoration:none;">
@@ -582,8 +928,8 @@
     bindUpload();
   }
 
-  function renderFields(fields){
-    return Object.entries(fields).map(([key,value],i)=>`
+  function renderFields(fields) {
+    return Object.entries(fields).map(([key, value], i) => `
       <div class="field-row" style="animation-delay:${i*50}ms">
         <span class="field-label">${key}</span>
         <input type="text" class="field-value" id="fld-${slugify(key)}" value="${esc(value||'')}" placeholder="Not detected" data-field="${key}" oninput="saveField('${key}',this.value)"/>
@@ -591,177 +937,187 @@
       </div>`).join('');
   }
 
-  function saveField(name,val){
-    if(!currentOrderId)return;
-    const o=getById(currentOrderId);if(!o)return;
-    const f={...(o.extractedFields||{}),[name]:val};
-    updateOrder(currentOrderId,{extractedFields:f});
+  async function saveField(name, val) {
+    if (!currentOrderId) return;
+    const o = getById(currentOrderId); if (!o) return;
+    const f = { ...(o.extractedFields || {}), [name]: val };
+    await updateOrder(currentOrderId, { extractedFields: f });
   }
 
-  function copyField(name,val,btn){
-    if(!val||!val.trim()){showToast(`No value for ${name}`,'error');return;}
-    navigator.clipboard.writeText(val.trim()).then(()=>{
-      const orig=btn.innerHTML;btn.classList.add('copied');btn.innerHTML='✓ Copied';
-      showToast('Copied!','success');
-      setTimeout(()=>{btn.classList.remove('copied');btn.innerHTML=orig;},1500);
-    }).catch(()=>showToast('Copy failed','error'));
+  function copyField(name, val, btn) {
+    if (!val || !val.trim()) { showToast(`No value for ${name}`, 'error'); return; }
+    navigator.clipboard.writeText(val.trim()).then(() => {
+      const orig = btn.innerHTML; btn.classList.add('copied'); btn.innerHTML = '✓ Copied';
+      showToast('Copied!', 'success');
+      setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = orig; }, 1500);
+    }).catch(() => showToast('Copy failed', 'error'));
   }
 
-  function copyAll(orderId){
-    const lines=[];
-    document.querySelectorAll('.field-value').forEach(inp=>{
-      const n=inp.dataset.field;if(n&&inp.value.trim())lines.push(`${n}: ${inp.value.trim()}`);
+  function copyAll(orderId) {
+    const lines = [];
+    document.querySelectorAll('.field-value').forEach(inp => {
+      const n = inp.dataset.field; if (n && inp.value.trim()) lines.push(`${n}: ${inp.value.trim()}`);
     });
-    if(lines.length===0){showToast('No fields to copy','error');return;}
-    navigator.clipboard.writeText(lines.join('\n')).then(()=>{
-      const btn=document.getElementById('copy-all-btn');
-      const orig=btn.innerHTML;btn.classList.add('copied');btn.innerHTML='✅ Copied All!';
-      showToast('All fields copied to clipboard!','success');
-      setTimeout(()=>{btn.classList.remove('copied');btn.innerHTML=orig;},2000);
-    }).catch(()=>showToast('Copy failed','error'));
+    if (lines.length === 0) { showToast('No fields to copy', 'error'); return; }
+    navigator.clipboard.writeText(lines.join('\n')).then(() => {
+      const btn = document.getElementById('copy-all-btn');
+      const orig = btn.innerHTML; btn.classList.add('copied'); btn.innerHTML = '✅ Copied All!';
+      showToast('All fields copied to clipboard!', 'success');
+      setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = orig; }, 2000);
+    }).catch(() => showToast('Copy failed', 'error'));
   }
 
-  function markComplete(orderId){
-    updateOrder(orderId,{status:'completed'});
-    showToast('Order marked as completed! ✅','success');
+  async function markComplete(orderId) {
+    await updateOrder(orderId, { status: 'completed' });
+    showToast('Order marked as completed! ✅', 'success');
     renderOrderDetail(orderId);
   }
 
-  function confirmDelete(orderId){
-    const o=getById(orderId);if(!o)return;
-    if(confirm(`Delete order for "${o.studentName}"? This cannot be undone.`)){
-      deleteOrder(orderId);showToast('Order deleted','info');showView('dashboard');
+  async function confirmDelete(orderId) {
+    const o = getById(orderId); if (!o) return;
+    if (confirm(`Delete order for "${o.studentName}"? This cannot be undone.`)) {
+      await deleteOrder(orderId);
+      showToast('Order deleted', 'info');
+      showView('dashboard');
     }
   }
 
-  /* ========== UPLOAD ========== */
-  function bindUpload(){
-    const area=document.getElementById('upload-area');
-    const input=document.getElementById('doc-upload-input');
-    if(!area||!input)return;
-    area.addEventListener('dragover',e=>{e.preventDefault();area.classList.add('drag-over');});
-    area.addEventListener('dragleave',()=>area.classList.remove('drag-over'));
-    area.addEventListener('drop',e=>{e.preventDefault();area.classList.remove('drag-over');handleFiles(e.dataTransfer.files);});
-    input.addEventListener('change',e=>{handleFiles(e.target.files);input.value='';});
+  /* =========================================
+     UPLOAD
+     ========================================= */
+  function bindUpload() {
+    const area  = document.getElementById('upload-area');
+    const input = document.getElementById('doc-upload-input');
+    if (!area || !input) return;
+    area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('drag-over'); });
+    area.addEventListener('dragleave', () => area.classList.remove('drag-over'));
+    area.addEventListener('drop', e => { e.preventDefault(); area.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
+    input.addEventListener('change', e => { handleFiles(e.target.files); input.value = ''; });
   }
 
-  function handleFiles(fileList){
-    const files=Array.from(fileList).filter(f=>f.type.startsWith('image/'));
-    if(files.length===0){showToast('Please upload image files (PNG, JPG)','error');return;}
-    files.forEach(f=>{uploadedFiles.push(f);addThumb(f);});
-    showToast(`${files.length} document(s) added`,'success');
+  function handleFiles(fileList) {
+    const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+    if (files.length === 0) { showToast('Please upload image files (PNG, JPG)', 'error'); return; }
+    files.forEach(f => { uploadedFiles.push(f); addThumb(f); });
+    showToast(`${files.length} document(s) added`, 'success');
   }
 
-  function addThumb(file){
-    const grid=document.getElementById('docs-grid');if(!grid)return;
-    const reader=new FileReader();
-    reader.onload=e=>{
-      const idx=uploadedFiles.indexOf(file);
-      const thumb=document.createElement('div');
-      thumb.className='doc-thumb';thumb.id=`thumb-${idx}`;
-      thumb.innerHTML=`<img src="${e.target.result}" alt="${file.name}"/><button class="doc-thumb-remove" onclick="event.stopPropagation();removeDoc(${idx})">✕</button>`;
+  function addThumb(file) {
+    const grid = document.getElementById('docs-grid'); if (!grid) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const idx = uploadedFiles.indexOf(file);
+      const thumb = document.createElement('div');
+      thumb.className = 'doc-thumb'; thumb.id = `thumb-${idx}`;
+      thumb.innerHTML = `<img src="${e.target.result}" alt="${file.name}"/><button class="doc-thumb-remove" onclick="event.stopPropagation();removeDoc(${idx})">✕</button>`;
       grid.appendChild(thumb);
     };
     reader.readAsDataURL(file);
   }
 
-  function removeDoc(idx){uploadedFiles.splice(idx,1);refreshThumbs();}
-  function refreshThumbs(){
-    const grid=document.getElementById('docs-grid');if(!grid)return;
-    grid.innerHTML='';uploadedFiles.forEach(f=>addThumb(f));
+  function removeDoc(idx) { uploadedFiles.splice(idx, 1); refreshThumbs(); }
+  function refreshThumbs() {
+    const grid = document.getElementById('docs-grid'); if (!grid) return;
+    grid.innerHTML = ''; uploadedFiles.forEach(f => addThumb(f));
   }
 
-  /* ========== OCR ========== */
-  async function handleScan(orderId){
-    if(uploadedFiles.length===0){showToast('Please upload at least one document photo','error');return;}
-    const btn=document.getElementById('scan-docs-btn');
-    btn.disabled=true;btn.innerHTML='⏳ Scanning...';
+  /* =========================================
+     OCR
+     ========================================= */
+  async function handleScan(orderId) {
+    if (uploadedFiles.length === 0) { showToast('Please upload at least one document photo', 'error'); return; }
+    const btn = document.getElementById('scan-docs-btn');
+    btn.disabled = true; btn.innerHTML = '⏳ Scanning...';
     showProgress();
-    try{
-      const dataUrls=await Promise.all(uploadedFiles.map(fileToDataUrl));
-      const allFields={};
-      for(let i=0;i<dataUrls.length;i++){
-        const statusEl=document.getElementById('ocr-progress-text');
-        if(statusEl)statusEl.textContent=`Scanning document ${i+1} of ${dataUrls.length}...`;
-        try{
-          const worker=await Tesseract.createWorker('eng',1,{logger:m=>{if(m.status==='recognizing text')setProgress(Math.round(m.progress*100));}});
-          const{data}=await worker.recognize(dataUrls[i]);
+    try {
+      const dataUrls = await Promise.all(uploadedFiles.map(fileToDataUrl));
+      const allFields = {};
+      for (let i = 0; i < dataUrls.length; i++) {
+        const statusEl = document.getElementById('ocr-progress-text');
+        if (statusEl) statusEl.textContent = `Scanning document ${i+1} of ${dataUrls.length}...`;
+        try {
+          const worker = await Tesseract.createWorker('eng', 1, { logger: m => { if (m.status === 'recognizing text') setProgress(Math.round(m.progress * 100)); } });
+          const { data } = await worker.recognize(dataUrls[i]);
           await worker.terminate();
-          const extracted=extractFields(data.text);
-          for(const[k,v]of Object.entries(extracted)){if(v&&v.trim()&&(!allFields[k]||!allFields[k].trim()))allFields[k]=v;}
-        }catch(err){console.warn('OCR warn:',err);}
+          const extracted = extractFields(data.text);
+          for (const [k, v] of Object.entries(extracted)) { if (v && v.trim() && (!allFields[k] || !allFields[k].trim())) allFields[k] = v; }
+        } catch(err) { console.warn('OCR warn:', err); }
       }
-      updateOrder(orderId,{extractedFields:allFields,status:'processing'});
-      const fg=document.getElementById('fields-grid');
-      if(fg){
-        const def={'Full Name':'','Date of Birth':'','Aadhaar Number':'',"Father's Name":'','Gender':'','Address':'','Phone Number':'','PAN Number':''};
-        fg.innerHTML=renderFields({...def,...allFields});
+      await updateOrder(orderId, { extractedFields: allFields, status: 'processing' });
+      const fg = document.getElementById('fields-grid');
+      if (fg) {
+        const def = { 'Full Name':'', 'Date of Birth':'', 'Aadhaar Number':'', "Father's Name":'', 'Gender':'', 'Address':'', 'Phone Number':'', 'PAN Number':'' };
+        fg.innerHTML = renderFields({ ...def, ...allFields });
       }
-      showToast('Documents scanned successfully!','success');
-    }catch(err){showToast('OCR failed. Try a clearer image.','error');}
-    finally{btn.disabled=false;btn.innerHTML='🔍 Run Smart Scan';hideProgress();}
+      showToast('Documents scanned successfully!', 'success');
+    } catch(err) { showToast('OCR failed. Try a clearer image.', 'error'); }
+    finally { btn.disabled = false; btn.innerHTML = '🔍 Run Smart Scan'; hideProgress(); }
   }
 
-  function extractFields(text){
-    const f={'Full Name':'','Date of Birth':'','Aadhaar Number':'',"Father's Name":'','Gender':'','Address':'','Phone Number':'','PAN Number':''};
-    if(!text)return f;
-    const norm=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
-    const lines=norm.split('\n').map(l=>l.trim()).filter(Boolean);
-    const aam=norm.match(/\b(\d{4}\s?\d{4}\s?\d{4})\b/);
-    if(aam){const d=aam[1].replace(/\s/g,'');if(d.length===12)f['Aadhaar Number']=d.replace(/(\d{4})(\d{4})(\d{4})/,'$1 $2 $3');}
-    const dobPats=[/(?:DOB|Date\s*of\s*Birth)[:\s]*(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})/i,/\b(\d{2}[\/-]\d{2}[\/-]\d{4})\b/];
-    for(const p of dobPats){const m=norm.match(p);if(m){f['Date of Birth']=m[1].trim();break;}}
-    const panM=norm.match(/\b([A-Z]{5}[0-9]{4}[A-Z])\b/);if(panM)f['PAN Number']=panM[1];
-    const genM=norm.match(/\b(male|female|Male|Female|MALE|FEMALE)\b/i);
-    if(genM){const g=genM[1].toLowerCase();f['Gender']=g==='male'?'Male':'Female';}
-    for(const line of lines){
-      const nm=line.match(/(?:Name|नाम)[:\s]+(.+)/i);
-      if(nm&&!f['Full Name']){const n=nm[1].replace(/[^a-zA-Z\s.]/g,'').trim();if(n.length>=3)f['Full Name']=n.replace(/\b\w/g,l=>l.toUpperCase());}
-      const fm=line.match(/(?:Father|S\/O|D\/O|W\/O|पिता)[:\s]+(.+)/i);
-      if(fm&&!f["Father's Name"]){const fn=fm[1].replace(/[^a-zA-Z\s.]/g,'').trim();if(fn.length>=3)f["Father's Name"]=fn.replace(/\b\w/g,l=>l.toUpperCase());}
+  function extractFields(text) {
+    const f = { 'Full Name':'', 'Date of Birth':'', 'Aadhaar Number':'', "Father's Name":'', 'Gender':'', 'Address':'', 'Phone Number':'', 'PAN Number':'' };
+    if (!text) return f;
+    const norm = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+    const lines = norm.split('\n').map(l => l.trim()).filter(Boolean);
+    const aam = norm.match(/\b(\d{4}\s?\d{4}\s?\d{4})\b/);
+    if (aam) { const d = aam[1].replace(/\s/g,''); if (d.length === 12) f['Aadhaar Number'] = d.replace(/(\d{4})(\d{4})(\d{4})/,'$1 $2 $3'); }
+    const dobPats = [/(?:DOB|Date\s*of\s*Birth)[:\s]*(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})/i, /\b(\d{2}[\/-]\d{2}[\/-]\d{4})\b/];
+    for (const p of dobPats) { const m = norm.match(p); if (m) { f['Date of Birth'] = m[1].trim(); break; } }
+    const panM = norm.match(/\b([A-Z]{5}[0-9]{4}[A-Z])\b/); if (panM) f['PAN Number'] = panM[1];
+    const genM = norm.match(/\b(male|female|Male|Female|MALE|FEMALE)\b/i);
+    if (genM) { const g = genM[1].toLowerCase(); f['Gender'] = g === 'male' ? 'Male' : 'Female'; }
+    for (const line of lines) {
+      const nm = line.match(/(?:Name|नाम)[:\s]+(.+)/i);
+      if (nm && !f['Full Name']) { const n = nm[1].replace(/[^a-zA-Z\s.]/g,'').trim(); if (n.length >= 3) f['Full Name'] = n.replace(/\b\w/g, l => l.toUpperCase()); }
+      const fm = line.match(/(?:Father|S\/O|D\/O|W\/O|पिता)[:\s]+(.+)/i);
+      if (fm && !f["Father's Name"]) { const fn = fm[1].replace(/[^a-zA-Z\s.]/g,'').trim(); if (fn.length >= 3) f["Father's Name"] = fn.replace(/\b\w/g, l => l.toUpperCase()); }
     }
-    const mobM=norm.match(/\b([6-9]\d{9})\b/);if(mobM)f['Phone Number']=mobM[1];
+    const mobM = norm.match(/\b([6-9]\d{9})\b/); if (mobM) f['Phone Number'] = mobM[1];
     return f;
   }
 
-  function fileToDataUrl(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);});}
-  function showProgress(){const c=document.getElementById('ocr-progress');if(c)c.classList.add('active');}
-  function hideProgress(){const c=document.getElementById('ocr-progress');if(c)setTimeout(()=>c.classList.remove('active'),500);}
-  function setProgress(p){const f=document.getElementById('ocr-progress-fill');const pe=document.getElementById('ocr-progress-percent');if(f)f.style.width=p+'%';if(pe)pe.textContent=p+'%';}
+  function fileToDataUrl(file) { return new Promise((res,rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file); }); }
+  function showProgress() { const c = document.getElementById('ocr-progress'); if (c) c.classList.add('active'); }
+  function hideProgress() { const c = document.getElementById('ocr-progress'); if (c) setTimeout(() => c.classList.remove('active'), 500); }
+  function setProgress(p) { const f = document.getElementById('ocr-progress-fill'); const pe = document.getElementById('ocr-progress-percent'); if (f) f.style.width = p + '%'; if (pe) pe.textContent = p + '%'; }
 
-  /* ========== SEARCH ========== */
+  /* =========================================
+     SEARCH
+     ========================================= */
   let searchDebounce;
-  function bindSearch(){
-    const si=document.getElementById('search-input');
-    if(!si)return;
-    si.addEventListener('input',()=>{
+  function bindSearch() {
+    const si = document.getElementById('search-input');
+    if (!si) return;
+    si.addEventListener('input', () => {
       clearTimeout(searchDebounce);
-      searchDebounce=setTimeout(()=>{
-        const q=si.value.toLowerCase().trim();
-        const orders=q?getOrders().filter(o=>o.studentName.toLowerCase().includes(q)||o.service.toLowerCase().includes(q)||o.phone.includes(q)):getOrders();
-        const grid=document.getElementById('orders-grid');if(!grid)return;
-        if(orders.length===0){grid.innerHTML='<div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">🔍</div><p style="color:var(--text-secondary);">No results found</p></div>';return;}
-        grid.innerHTML=orders.map((o,i)=>{
-          const date=new Date(o.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
-          return`<div class="order-row" onclick="showView('order-detail',{orderId:'${o.id}'})" style="animation-delay:${i*40}ms">
+      searchDebounce = setTimeout(() => {
+        const q = si.value.toLowerCase().trim();
+        const orders = q ? getOrders().filter(o => o.studentName.toLowerCase().includes(q) || o.service.toLowerCase().includes(q) || o.phone.includes(q)) : getOrders();
+        const grid = document.getElementById('orders-grid'); if (!grid) return;
+        if (orders.length === 0) { grid.innerHTML = '<div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">🔍</div><p style="color:var(--text-secondary);">No results found</p></div>'; return; }
+        grid.innerHTML = orders.map((o, i) => {
+          const date = new Date(o.createdAt).toLocaleDateString('en-IN', { day:'numeric', month:'short' });
+          return `<div class="order-row" onclick="showView('order-detail',{orderId:'${o.id}'})" style="animation-delay:${i*40}ms">
             <div class="order-row-avatar">${getInitials(o.studentName)}</div>
             <div class="order-row-info"><div class="order-row-name">${esc(o.studentName)}</div><div class="order-row-service">${esc(o.service)}</div></div>
             <div class="order-row-meta"><span>📅 ${date}</span><span>📱 ${o.phone?'···'+o.phone.slice(-4):'—'}</span></div>
             <span class="status-badge status-${o.status}">${o.status}</span>
           </div>`;
         }).join('');
-      },250);
+      }, 250);
     });
   }
 
-  /* ========== INIT ========== */
-  document.addEventListener('DOMContentLoaded',()=>{
-    document.querySelectorAll('.nav-item[data-view]').forEach(item=>{
-      item.addEventListener('click',()=>showView(item.dataset.view));
+  /* =========================================
+     INIT
+     ========================================= */
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.nav-item[data-view]').forEach(item => {
+      item.addEventListener('click', () => showView(item.dataset.view));
     });
     bindSearch();
-    renderDashboard();
-    updateBadge();
+    setDbStatus('', 'Connecting...');
+    tryAutoConnect();
   });
 </script>
 </body>
