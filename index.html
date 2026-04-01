@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CYBER CAFE — Smart Workspace</title>
+<meta name="theme-color" content="#EEF0EB">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg-app:#D0D0D0;
+  --bg-primary:#EEF0EB;
+  --bg-surface:#FFFFFF;
+  --bg-surface-dim:rgba(0,0,0,0.03);
+  --bg-surface-hover:rgba(0,0,0,0.06);
+  --primary:#101010;
+  --primary-light:#2A2A2A;
+  --accent-sage:#D5E5CB;
+  --accent-lime:#DCFF7D;
+  --accent-pale-yellow:#F6FBBD;
+  --accent-grey:#D5D6D2;
+  --success:#63AE66;
+  --success-glow:rgba(99,174,102,0.2);
+  --warning:#FFBB5C;
+  --danger:#FF686B;
+  --danger-glow:rgba(255,104,107,0.2);
+  --whatsapp:#4ECB71;
+  --whatsapp-glow:rgba(78,203,113,0.25);
+  --text-primary:#121212;
+  --text-secondary:#6B6B6B;
+  --text-tertiary:#A5A5A5;
+  --text-inverse:#FFFFFF;
+  --border:rgba(0,0,0,0.06);
+  --border-hover:rgba(0,0,0,0.12);
+  --shadow-sm:0 4px 12px rgba(0,0,0,0.03);
+  --shadow-md:0 12px 32px rgba(0,0,0,0.06);
+  --shadow-lg:0 24px 64px rgba(0,0,0,0.08);
+  --radius-sm:12px;
+  --radius-md:20px;
+  --radius-lg:32px;
+  --radius-xl:48px;
+  --radius-full:9999px;
+  --ease-spring:cubic-bezier(0.34,1.56,0.64,1);
+  --ease-smooth:cubic-bezier(0.4,0,0.2,1);
+  --transition-fast:150ms var(--ease-smooth);
+  --transition-base:250ms var(--ease-smooth);
+  --transition-spring:500ms var(--ease-spring);
+}
+html{font-size:16px;scroll-behavior:smooth;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg-app);color:var(--text-primary);min-height:100vh;overflow-x:hidden;line-height:1.5;display:flex;justify-content:center;align-items:center;}
+.app-phone-container{width:100%;max-width:1100px;min-height:95vh;background:var(--bg-primary);border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);display:flex;flex-direction:column;position:relative;overflow:hidden;margin:2vh auto;}
+.app-phone-container::before{content:'';position:absolute;top:10%;right:-10%;width:50vw;height:50vw;background:radial-gradient(circle,rgba(213,229,203,0.5) 0%,transparent 60%);filter:blur(60px);pointer-events:none;z-index:0;}
+.app-phone-container::after{content:'';position:absolute;bottom:0%;left:-10%;width:40vw;height:40vw;background:radial-gradient(circle,rgba(246,251,189,0.5) 0%,transparent 60%);filter:blur(80px);pointer-events:none;z-index:0;}
+a{color:var(--primary);text-decoration:none;}
+button{cursor:pointer;font-family:inherit;}
+input,select,textarea{font-family:inherit;}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border-hover);border-radius:10px;}
+.app-layout{display:flex;flex-direction:row;min-height:100%;position:relative;z-index:1;}
+.top-nav{position:relative;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:32px 48px;flex-wrap:wrap;gap:12px;}
+.brand-section{display:flex;align-items:center;gap:12px;}
+.logo-mark{font-size:22px;font-weight:800;color:var(--primary);width:44px;height:44px;display:flex;justify-content:center;align-items:center;background:white;border-radius:var(--radius-full);box-shadow:var(--shadow-sm);}
+.brand-text h1{font-size:20px;font-weight:700;letter-spacing:-0.5px;}
+.nav-pills{display:flex;gap:10px;background:white;padding:8px;border-radius:var(--radius-full);box-shadow:var(--shadow-md);}
+.nav-item{display:inline-flex;align-items:center;gap:8px;padding:10px 24px;border-radius:var(--radius-full);color:var(--text-secondary);font-size:14px;font-weight:600;transition:all var(--transition-base);border:none;background:transparent;cursor:pointer;}
+.nav-item:hover{background:var(--bg-surface-hover);color:var(--text-primary);}
+.nav-item.active{background:var(--primary);color:var(--text-inverse);box-shadow:0 4px 16px rgba(0,0,0,0.15);}
+.nav-badge{background:var(--danger);color:white;font-size:11px;font-weight:700;padding:2px 6px;border-radius:var(--radius-full);}
+.user-actions{display:flex;gap:12px;}
+.search-box{position:relative;width:300px;}
+.search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--text-secondary);}
+.search-input{width:100%;padding:12px 20px 12px 48px;background:white;border:none;border-radius:var(--radius-full);font-size:15px;box-shadow:var(--shadow-sm);outline:none;}
+.search-input:focus{box-shadow:var(--shadow-md);}
+.main-content{flex:1;position:relative;padding:0 48px 64px 48px;}
+.page-header{margin-bottom:40px;}
+.page-title{font-size:36px;font-weight:500;letter-spacing:-1px;line-height:1.2;}
+.page-subtitle{font-size:16px;color:var(--text-secondary);margin-top:8px;}
+.view{display:none;animation:scaleIn 0.5s var(--ease-spring);}
+.view.active{display:block;}
+@keyframes scaleIn{from{opacity:0;transform:translateY(24px) scale(0.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+@keyframes cardEntry{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-bottom:40px;}
+.stat-pill{background:var(--bg-surface);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;transition:all var(--transition-base);cursor:default;}
+.stat-pill:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);}
+.stat-pill.accent-sage{background:var(--accent-sage);}
+.stat-pill.accent-lime{background:var(--accent-lime);}
+.stat-pill.accent-yellow{background:var(--accent-pale-yellow);}
+.stat-icon-wrapper{width:40px;height:40px;border-radius:var(--radius-full);background:rgba(0,0,0,0.05);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px;}
+.stat-value{font-size:36px;font-weight:400;letter-spacing:-1.5px;line-height:1;margin-bottom:4px;}
+.stat-label{font-size:14px;color:var(--text-secondary);font-weight:500;}
+.orders-section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+.orders-section-header h2{font-size:24px;font-weight:500;}
+.orders-list{display:flex;flex-direction:column;gap:10px;}
+.order-row{background:white;border-radius:var(--radius-full);padding:12px 24px;display:flex;align-items:center;box-shadow:var(--shadow-sm);transition:all var(--transition-base);animation:cardEntry 0.5s var(--ease-spring) backwards;cursor:pointer;}
+.order-row:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
+.order-row-avatar{width:48px;height:48px;border-radius:var(--radius-full);background:var(--bg-primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:var(--primary);flex-shrink:0;margin-right:16px;}
+.order-row-info{flex:1;}
+.order-row-name{font-size:16px;font-weight:600;}
+.order-row-service{font-size:13px;color:var(--text-secondary);}
+.order-row-meta{display:flex;align-items:center;gap:20px;font-size:14px;color:var(--text-secondary);margin-right:20px;}
+.status-badge{display:inline-flex;align-items:center;padding:6px 16px;border-radius:var(--radius-full);font-size:12px;font-weight:600;background:var(--bg-primary);}
+.status-pending{background:var(--accent-pale-yellow);color:#8C7311;}
+.status-processing{background:var(--accent-sage);color:#436334;}
+.status-completed{background:var(--accent-lime);color:#4C610A;}
+.fab-container{position:absolute;bottom:0px;right:0px;z-index:1000;display:flex;justify-content:flex-end;padding:40px;pointer-events:none;}
+.fab-btn{pointer-events:auto;width:72px;height:72px;border-radius:var(--radius-full);background:var(--primary);color:white;font-size:32px;display:flex;align-items:center;justify-content:center;box-shadow:0 16px 32px rgba(0,0,0,0.3);border:none;transition:all var(--transition-spring);cursor:pointer;}
+.fab-btn:hover{transform:scale(1.08) translateY(-4px);box-shadow:0 24px 48px rgba(0,0,0,0.4);}
+.fab-btn:active{transform:scale(0.95);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 28px;border-radius:var(--radius-full);font-size:15px;font-weight:600;border:none;transition:all var(--transition-base);white-space:nowrap;cursor:pointer;}
+.btn-primary{background:var(--primary);color:white;}
+.btn-primary:hover{background:var(--primary-light);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.2);}
+.btn-secondary{background:white;color:var(--text-primary);box-shadow:var(--shadow-sm);}
+.btn-secondary:hover{background:var(--bg-surface-hover);transform:translateY(-2px);}
+.btn-whatsapp{background:var(--whatsapp);color:white;}
+.btn-whatsapp:hover{box-shadow:0 8px 24px var(--whatsapp-glow);transform:translateY(-2px);}
+.btn-danger{background:var(--danger);color:white;}
+.btn-danger:hover{box-shadow:0 8px 24px var(--danger-glow);transform:translateY(-2px);}
+.btn-ghost{background:transparent;color:var(--text-secondary);border:none;}
+.btn-ghost:hover{background:rgba(0,0,0,0.05);color:var(--text-primary);}
+.btn-copy{background:rgba(0,0,0,0.05);color:var(--text-primary);padding:8px 16px;font-size:13px;border-radius:var(--radius-full);border:none;cursor:pointer;transition:all 200ms;}
+.btn-copy:hover{background:var(--primary);color:white;}
+.btn-copy.copied{background:var(--accent-sage)!important;color:#436334!important;}
+.btn-copy-all{background:var(--accent-lime);color:#1A1A1A;font-weight:700;box-shadow:0 8px 24px rgba(220,255,125,0.4);padding:16px 32px;font-size:16px;border-radius:var(--radius-full);border:none;cursor:pointer;transition:all 250ms;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-copy-all:hover{transform:translateY(-2px);}
+.btn-copy-all.copied{background:var(--success);color:white;box-shadow:0 8px 24px var(--success-glow);}
+.form-card{background:white;border-radius:var(--radius-xl);padding:40px;box-shadow:var(--shadow-md);max-width:680px;margin:0 auto;}
+.form-group{margin-bottom:20px;}
+.form-label{display:block;font-size:14px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;padding-left:16px;}
+.form-input,.form-select,.form-textarea{width:100%;padding:16px 24px;background:var(--bg-primary);border:1px solid transparent;border-radius:var(--radius-lg);color:var(--text-primary);font-size:15px;transition:all var(--transition-base);outline:none;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{background:white;border-color:var(--primary);box-shadow:0 8px 24px rgba(0,0,0,0.05);}
+.form-textarea{border-radius:var(--radius-md);min-height:100px;resize:vertical;}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23121212' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 20px center;padding-right:48px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.upload-area{background:var(--bg-primary);border:2px dashed rgba(0,0,0,0.1);border-radius:var(--radius-xl);padding:48px;text-align:center;cursor:pointer;transition:all var(--transition-base);position:relative;}
+.upload-area:hover,.upload-area.drag-over{border-color:var(--primary);background:white;transform:scale(1.02);box-shadow:var(--shadow-md);}
+.upload-icon{font-size:48px;margin-bottom:16px;opacity:0.8;}
+.upload-title{font-size:18px;font-weight:600;margin-bottom:4px;}
+.upload-subtitle{font-size:14px;color:var(--text-tertiary);}
+.upload-input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.docs-grid{display:flex;flex-wrap:wrap;gap:16px;margin-top:20px;}
+.doc-thumb{position:relative;border-radius:var(--radius-lg);overflow:hidden;width:120px;height:160px;box-shadow:var(--shadow-sm);transition:all var(--transition-base);}
+.doc-thumb:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);}
+.doc-thumb img{width:100%;height:100%;object-fit:cover;}
+.doc-thumb-remove{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:var(--radius-full);background:white;color:var(--primary);border:none;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;box-shadow:var(--shadow-sm);transition:opacity var(--transition-fast);}
+.doc-thumb:hover .doc-thumb-remove{opacity:1;}
+.order-detail-layout{display:grid;grid-template-columns:1fr 1fr;gap:32px;}
+.detail-card{background:white;border-radius:var(--radius-xl);padding:32px;box-shadow:var(--shadow-lg);}
+.fields-grid{display:flex;flex-direction:column;gap:8px;}
+.field-row{display:flex;align-items:center;gap:16px;padding:12px 24px;background:var(--bg-primary);border-radius:var(--radius-full);transition:all var(--transition-base);animation:cardEntry 0.5s var(--ease-spring) backwards;}
+.field-row:hover{background:white;box-shadow:var(--shadow-sm);}
+.field-label{width:140px;font-size:13px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;flex-shrink:0;}
+.field-value{flex:1;padding:8px;background:transparent;border:none;color:var(--text-primary);font-size:15px;font-weight:500;outline:none;min-width:0;}
+.field-value:focus{border-bottom:2px solid var(--primary);}
+.order-info-header{display:flex;align-items:center;gap:24px;padding:20px 28px;background:white;border-radius:var(--radius-full);margin-bottom:28px;box-shadow:var(--shadow-md);}
+.order-info-avatar{width:64px;height:64px;border-radius:var(--radius-full);background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;flex-shrink:0;}
+.order-info-details{flex:1;}
+.order-info-details h2{font-size:24px;font-weight:600;}
+.order-info-details p{color:var(--text-secondary);font-size:15px;}
+.section-title{font-size:20px;font-weight:600;margin-bottom:20px;}
+.toast-container{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);z-index:10000;display:flex;flex-direction:column-reverse;gap:10px;pointer-events:none;}
+.toast{padding:16px 24px;border-radius:var(--radius-full);font-size:15px;font-weight:600;background:var(--primary);color:white;box-shadow:var(--shadow-lg);animation:toastIn 0.4s var(--ease-spring);}
+.toast-success{background:var(--success);}
+.toast-error{background:var(--danger);}
+.toast.removing{animation:toastOut 0.3s forwards;}
+@keyframes toastIn{from{opacity:0;transform:translateY(40px) scale(0.9);}to{opacity:1;transform:translateY(0) scale(1);}}
+@keyframes toastOut{to{opacity:0;transform:translateY(40px) scale(0.9);}}
+.empty-state{text-align:center;padding:80px 20px;opacity:0.6;}
+.section-title{font-size:20px;font-weight:600;margin-bottom:20px;}
+.mt-lg{margin-top:20px;}
+.mt-xl{margin-top:32px;}
+.mb-lg{margin-bottom:20px;}
+.ocr-progress-container{margin:16px 0;display:none;}
+.ocr-progress-container.active{display:block;}
+.ocr-progress-bar{width:100%;height:8px;background:var(--bg-primary);border-radius:var(--radius-full);overflow:hidden;}
+.ocr-progress-fill{height:100%;width:0%;background:var(--primary);transition:width 0.3s;}
+.ocr-progress-label{display:flex;justify-content:space-between;font-size:14px;font-weight:600;margin-bottom:8px;}
+@media(max-width:1024px){.order-detail-layout,.stats-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:768px){
+  .app-phone-container{margin:0;border-radius:0;min-height:100vh;}
+  .top-nav{flex-direction:column;gap:12px;padding:16px 20px;}
+  .main-content{padding:0 20px 60px;}
+  .order-detail-layout,.stats-grid,.form-row{grid-template-columns:1fr;}
+  .order-row{flex-direction:column;text-align:center;border-radius:var(--radius-lg);padding:20px;}
+  .order-row-avatar{margin:0 0 10px 0;}
+  .order-row-meta{margin:10px 0;justify-content:center;width:100%;gap:12px;}
+  .field-row{flex-direction:column;align-items:flex-start;border-radius:var(--radius-lg);}
+  .field-label{width:auto;}
+}
+</style>
+</head>
+<body>
+
+<div class="app-layout">
+  <main class="app-phone-container">
+
+    <header class="top-nav">
+      <div class="brand-section">
+        <div class="logo-mark">C</div>
+        <div class="brand-text"><h1>CYBER CAFE</h1></div>
+      </div>
+      <nav class="nav-pills">
+        <button class="nav-item active" data-view="dashboard">
+          <span>Overview</span>
+          <span class="nav-badge" id="pending-badge" style="display:none;">0</span>
+        </button>
+        <button class="nav-item" data-view="new-order"><span>New Order</span></button>
+      </nav>
+      <div class="user-actions">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="search-input" placeholder="Search orders...">
+        </div>
+      </div>
+    </header>
+
+    <div class="main-content">
+
+      <!-- DASHBOARD -->
+      <section class="view active" id="dashboard-view">
+        <div class="page-header">
+          <h1 class="page-title">Workspace</h1>
+          <p class="page-subtitle">Your form-filling analytics and active queue.</p>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-pill accent-sage"><div class="stat-icon-wrapper">📦</div><div class="stat-value" id="stat-total">0</div><div class="stat-label">Total Orders</div></div>
+          <div class="stat-pill"><div class="stat-icon-wrapper">⏳</div><div class="stat-value" id="stat-pending">0</div><div class="stat-label">Pending</div></div>
+          <div class="stat-pill accent-yellow"><div class="stat-icon-wrapper">📅</div><div class="stat-value" id="stat-today">0</div><div class="stat-label">Today</div></div>
+          <div class="stat-pill accent-lime"><div class="stat-icon-wrapper">✨</div><div class="stat-value" id="stat-completed">0</div><div class="stat-label">Completed</div></div>
+        </div>
+        <div class="orders-section-header mt-xl">
+          <h2>Active Queue</h2>
+        </div>
+        <div class="orders-list" id="orders-grid"></div>
+        <div class="fab-container">
+          <button class="fab-btn" onclick="showView('new-order')" title="New Order">+</button>
+        </div>
+      </section>
+
+      <!-- NEW ORDER -->
+      <section class="view" id="new-order-view">
+        <div class="page-header">
+          <button class="btn btn-ghost mb-lg" onclick="showView('dashboard')">← Back to Workspace</button>
+          <h1 class="page-title">New Order</h1>
+          <p class="page-subtitle">Start a new form-filling request.</p>
+        </div>
+        <form id="new-order-form" class="form-card" onsubmit="handleCreateOrder(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Student Name *</label>
+              <input type="text" class="form-input" id="input-student-name" placeholder="Rahul Sharma" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">WhatsApp Number *</label>
+              <input type="tel" class="form-input" id="input-phone" placeholder="9876543210" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Service Type</label>
+            <select class="form-select" id="input-service">
+              <option>Exam Form</option><option>Scholarship</option><option>Admission Form</option>
+              <option>PAN Card</option><option>Passport</option><option>Voter ID</option><option>Driving License</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notes (optional)</label>
+            <textarea class="form-textarea" id="input-notes" placeholder="Special instructions..."></textarea>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:14px;margin-top:28px;">
+            <button type="button" class="btn btn-secondary" onclick="showView('dashboard')">Cancel</button>
+            <button type="submit" class="btn btn-primary" style="font-size:16px;padding:14px 48px;">Create Request</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ORDER DETAIL -->
+      <section class="view" id="order-detail-view">
+        <div class="page-header">
+          <button class="btn btn-ghost mb-lg" onclick="showView('dashboard')">← Workspace</button>
+          <h1 class="page-title">Order Details</h1>
+        </div>
+        <div id="order-detail-content"></div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+/* ========== STORAGE ========== */
+const STORAGE_KEY = 'cybercafe_orders';
+let uploadedFiles = [];
+let currentOrderId = null;
+
+function getOrders(){try{const d=localStorage.getItem(STORAGE_KEY);return d?JSON.parse(d):[];}catch{return[];}}
+function saveOrders(o){localStorage.setItem(STORAGE_KEY,JSON.stringify(o));}
+function getById(id){return getOrders().find(o=>o.id===id)||null;}
+function genId(){return'ord_'+Date.now().toString(36)+'_'+Math.random().toString(36).substr(2,6);}
+
+function createOrder(data){
+  const orders=getOrders();
+  const o={id:genId(),studentName:data.studentName||'',phone:data.phone||'',service:data.service||'Exam Form',notes:data.notes||'',status:'pending',extractedFields:{},createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+  orders.unshift(o);saveOrders(orders);return o;
+}
+function updateOrder(id,updates){
+  const orders=getOrders();const idx=orders.findIndex(o=>o.id===id);
+  if(idx===-1)return null;
+  orders[idx]={...orders[idx],...updates,updatedAt:new Date().toISOString()};
+  saveOrders(orders);return orders[idx];
+}
+function deleteOrder(id){saveOrders(getOrders().filter(o=>o.id!==id));}
+function getStats(){
+  const o=getOrders();const today=new Date().toDateString();
+  return{total:o.length,today:o.filter(x=>new Date(x.createdAt).toDateString()===today).length,pending:o.filter(x=>x.status==='pending').length,completed:o.filter(x=>x.status==='completed').length};
+}
+
+/* ========== TOAST ========== */
+function showToast(msg,type='info',dur=3000){
+  const c=document.getElementById('toast-container');
+  const t=document.createElement('div');
+  t.className=`toast toast-${type}`;
+  const icons={success:'✓',error:'✗',info:'ℹ'};
+  t.innerHTML=`${icons[type]||'ℹ'} ${msg}`;
+  c.appendChild(t);
+  setTimeout(()=>{t.classList.add('removing');setTimeout(()=>t.remove(),300);},dur);
+}
+
+/* ========== UTILS ========== */
+function getInitials(name){return(name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();}
+function esc(str){const d=document.createElement('div');d.textContent=str;return d.innerHTML;}
+function slugify(str){return str.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');}
+
+/* ========== NAVIGATION ========== */
+function showView(name,data){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const an=document.querySelector(`.nav-item[data-view="${name==='order-detail'?'dashboard':name}"]`);
+  if(an)an.classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const t=document.getElementById(`${name}-view`);
+  if(t){void t.offsetWidth;t.classList.add('active');}
+  if(name==='dashboard')renderDashboard();
+  else if(name==='new-order'){const f=document.getElementById('new-order-form');if(f)f.reset();}
+  else if(name==='order-detail'&&data){currentOrderId=data.orderId;renderOrderDetail(data.orderId);}
+  updateBadge();
+}
+
+function updateBadge(){
+  const s=getStats();const b=document.getElementById('pending-badge');
+  if(b){b.textContent=s.pending;b.style.display=s.pending>0?'inline':'none';}
+}
+
+/* ========== DASHBOARD ========== */
+function renderDashboard(){
+  const s=getStats();const orders=getOrders();
+  document.getElementById('stat-total').textContent=s.total;
+  document.getElementById('stat-pending').textContent=s.pending;
+  document.getElementById('stat-today').textContent=s.today;
+  document.getElementById('stat-completed').textContent=s.completed;
+  const grid=document.getElementById('orders-grid');
+  if(orders.length===0){
+    grid.innerHTML=`<div class="empty-state"><div style="font-size:56px;margin-bottom:16px;">📋</div><h3 style="font-size:22px;margin-bottom:8px;">No orders yet</h3><p style="color:var(--text-secondary);margin-bottom:24px;">Create your first order to get started</p><button class="btn btn-primary" onclick="showView('new-order')">➕ Create First Order</button></div>`;
+    return;
+  }
+  grid.innerHTML=orders.map((o,i)=>{
+    const date=new Date(o.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    return`<div class="order-row" onclick="showView('order-detail',{orderId:'${o.id}'})" style="animation-delay:${i*40}ms">
+      <div class="order-row-avatar">${getInitials(o.studentName)}</div>
+      <div class="order-row-info"><div class="order-row-name">${esc(o.studentName)}</div><div class="order-row-service">${esc(o.service)}</div></div>
+      <div class="order-row-meta"><span>📅 ${date}</span><span>📱 ${o.phone?'···'+o.phone.slice(-4):'—'}</span></div>
+      <span class="status-badge status-${o.status}">${o.status}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ========== NEW ORDER ========== */
+function handleCreateOrder(e){
+  e.preventDefault();
+  const name=document.getElementById('input-student-name').value.trim();
+  const phone=document.getElementById('input-phone').value.trim();
+  const service=document.getElementById('input-service').value;
+  const notes=document.getElementById('input-notes').value.trim();
+  if(!name){showToast('Please enter student name','error');return;}
+  if(!phone||phone.length<10){showToast('Please enter a valid phone number','error');return;}
+  const o=createOrder({studentName:name,phone,service,notes});
+  showToast(`Order created for ${name}!`,'success');
+  showView('order-detail',{orderId:o.id});
+}
+
+/* ========== WHATSAPP ========== */
+function getDocsForService(service){
+  const m={
+    'Exam Form':'1️⃣ Aadhaar Card (Front & Back)\n2️⃣ Passport Size Photo\n3️⃣ Marksheet / Grade Card\n4️⃣ Admit Card (if available)',
+    'Scholarship':'1️⃣ Aadhaar Card\n2️⃣ Income Certificate\n3️⃣ Marksheet\n4️⃣ Bank Account Details\n5️⃣ Passport Size Photo',
+    'Admission Form':'1️⃣ Aadhaar Card\n2️⃣ 10th & 12th Marksheet\n3️⃣ Transfer Certificate\n4️⃣ Migration Certificate\n5️⃣ Passport Size Photo',
+    'PAN Card':'1️⃣ Aadhaar Card (Front & Back)\n2️⃣ Passport Size Photo\n3️⃣ Signature on white paper',
+    'Passport':'1️⃣ Aadhaar Card\n2️⃣ PAN Card\n3️⃣ 10th Marksheet (DOB proof)\n4️⃣ Passport Size Photo\n5️⃣ Address Proof',
+    'Voter ID':'1️⃣ Aadhaar Card\n2️⃣ Passport Size Photo\n3️⃣ Address Proof',
+    'Driving License':'1️⃣ Aadhaar Card\n2️⃣ Address Proof\n3️⃣ Passport Size Photo\n4️⃣ Age Proof (if applicable)'
+  };
+  return m[service]||'1️⃣ Aadhaar Card\n2️⃣ Passport Size Photo\n3️⃣ Any relevant documents';
+}
+
+/* ========== ORDER DETAIL ========== */
+function renderOrderDetail(orderId){
+  const order=getById(orderId);
+  if(!order){showToast('Order not found','error');showView('dashboard');return;}
+  uploadedFiles=[];
+  const phone=order.phone.replace(/[^0-9]/g,'');
+  const fullPhone=phone.startsWith('91')?phone:'91'+phone;
+  const docList=getDocsForService(order.service);
+  const waMsg=encodeURIComponent(`🏢 *CYBER CAFE — Document Request*\n\nHello *${order.studentName}*! 👋\n\nFor your *${order.service}* application, please send clear photos of:\n\n${docList}\n\n📌 Make sure all text is clearly visible in the photos.\n\nThank you!\n— Team CYBER CAFE`);
+  const waLink=`https://wa.me/${fullPhone}?text=${waMsg}`;
+  const defaultFields={'Full Name':'','Date of Birth':'','Aadhaar Number':'',"Father's Name":'','Gender':'','Address':'','Phone Number':'','PAN Number':''};
+  const fields={...defaultFields,...(order.extractedFields||{})};
+
+  document.getElementById('order-detail-content').innerHTML=`
+    <div class="order-info-header">
+      <div class="order-info-avatar">${getInitials(order.studentName)}</div>
+      <div class="order-info-details">
+        <h2>${esc(order.studentName)}</h2>
+        <p>${esc(order.service)} · 📱 ${esc(order.phone)}</p>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span class="status-badge status-${order.status}">${order.status}</span>
+        <button onclick="confirmDelete('${order.id}')" style="background:none;border:none;font-size:20px;cursor:pointer;padding:8px;" title="Delete">🗑️</button>
+      </div>
+    </div>
+    ${order.notes?`<div class="detail-card" style="margin-bottom:28px;padding:20px 28px;"><strong>📝 Notes:</strong> ${esc(order.notes)}</div>`:''}
+    <div style="text-align:center;margin-bottom:36px;">
+      <a href="${waLink}" target="_blank" class="btn btn-whatsapp" style="font-size:16px;padding:16px 36px;box-shadow:0 12px 32px rgba(78,203,113,0.4);text-decoration:none;">
+        💬 Request Documents via WhatsApp
+      </a>
+    </div>
+    <div class="order-detail-layout">
+      <div class="detail-card">
+        <h3 class="section-title">Upload Documents</h3>
+        <div class="upload-area" id="upload-area">
+          <input type="file" class="upload-input" id="doc-upload-input" multiple accept="image/*"/>
+          <div class="upload-icon">📄</div>
+          <div class="upload-title">Drop files or tap here</div>
+          <div class="upload-subtitle">JPG, PNG accepted</div>
+        </div>
+        <div class="docs-grid" id="docs-grid"></div>
+        <div class="ocr-progress-container" id="ocr-progress">
+          <div class="ocr-progress-label">
+            <span id="ocr-progress-text">Scanning...</span>
+            <span id="ocr-progress-percent">0%</span>
+          </div>
+          <div class="ocr-progress-bar"><div class="ocr-progress-fill" id="ocr-progress-fill"></div></div>
+        </div>
+        <button class="btn btn-primary" id="scan-docs-btn" onclick="handleScan('${order.id}')" style="margin-top:24px;width:100%;">
+          🔍 Run Smart Scan
+        </button>
+      </div>
+      <div class="detail-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <h3 class="section-title" style="margin-bottom:0;">Extracted Details</h3>
+          <button class="btn btn-primary" onclick="markComplete('${order.id}')" style="padding:8px 18px;font-size:13px;">✅ Complete</button>
+        </div>
+        <div class="fields-grid" id="fields-grid">${renderFields(fields)}</div>
+        <button class="btn-copy-all" onclick="copyAll('${order.id}')" id="copy-all-btn" style="margin-top:24px;">
+          📋 Copy All to Portal
+        </button>
+      </div>
+    </div>`;
+  bindUpload();
+}
+
+function renderFields(fields){
+  return Object.entries(fields).map(([key,value],i)=>`
+    <div class="field-row" style="animation-delay:${i*50}ms">
+      <span class="field-label">${key}</span>
+      <input type="text" class="field-value" id="fld-${slugify(key)}" value="${esc(value||'')}" placeholder="Not detected" data-field="${key}" oninput="saveField('${key}',this.value)"/>
+      <button class="btn-copy" onclick="copyField('${key}',document.getElementById('fld-${slugify(key)}').value,this)">📋</button>
+    </div>`).join('');
+}
+
+function saveField(name,val){
+  if(!currentOrderId)return;
+  const o=getById(currentOrderId);if(!o)return;
+  const f={...(o.extractedFields||{}),[name]:val};
+  updateOrder(currentOrderId,{extractedFields:f});
+}
+
+function copyField(name,val,btn){
+  if(!val||!val.trim()){showToast(`No value for ${name}`,'error');return;}
+  navigator.clipboard.writeText(val.trim()).then(()=>{
+    const orig=btn.innerHTML;btn.classList.add('copied');btn.innerHTML='✓ Copied';
+    showToast('Copied!','success');
+    setTimeout(()=>{btn.classList.remove('copied');btn.innerHTML=orig;},1500);
+  }).catch(()=>showToast('Copy failed','error'));
+}
+
+function copyAll(orderId){
+  const lines=[];
+  document.querySelectorAll('.field-value').forEach(inp=>{
+    const n=inp.dataset.field;if(n&&inp.value.trim())lines.push(`${n}: ${inp.value.trim()}`);
+  });
+  if(lines.length===0){showToast('No fields to copy','error');return;}
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>{
+    const btn=document.getElementById('copy-all-btn');
+    const orig=btn.innerHTML;btn.classList.add('copied');btn.innerHTML='✅ Copied All!';
+    showToast('All fields copied to clipboard!','success');
+    setTimeout(()=>{btn.classList.remove('copied');btn.innerHTML=orig;},2000);
+  }).catch(()=>showToast('Copy failed','error'));
+}
+
+function markComplete(orderId){
+  updateOrder(orderId,{status:'completed'});
+  showToast('Order marked as completed! ✅','success');
+  renderOrderDetail(orderId);
+}
+
+function confirmDelete(orderId){
+  const o=getById(orderId);if(!o)return;
+  if(confirm(`Delete order for "${o.studentName}"? This cannot be undone.`)){
+    deleteOrder(orderId);showToast('Order deleted','info');showView('dashboard');
+  }
+}
+
+/* ========== UPLOAD ========== */
+function bindUpload(){
+  const area=document.getElementById('upload-area');
+  const input=document.getElementById('doc-upload-input');
+  if(!area||!input)return;
+  area.addEventListener('dragover',e=>{e.preventDefault();area.classList.add('drag-over');});
+  area.addEventListener('dragleave',()=>area.classList.remove('drag-over'));
+  area.addEventListener('drop',e=>{e.preventDefault();area.classList.remove('drag-over');handleFiles(e.dataTransfer.files);});
+  input.addEventListener('change',e=>{handleFiles(e.target.files);input.value='';});
+}
+
+function handleFiles(fileList){
+  const files=Array.from(fileList).filter(f=>f.type.startsWith('image/'));
+  if(files.length===0){showToast('Please upload image files (PNG, JPG)','error');return;}
+  files.forEach(f=>{uploadedFiles.push(f);addThumb(f);});
+  showToast(`${files.length} document(s) added`,'success');
+}
+
+function addThumb(file){
+  const grid=document.getElementById('docs-grid');if(!grid)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const idx=uploadedFiles.indexOf(file);
+    const thumb=document.createElement('div');
+    thumb.className='doc-thumb';thumb.id=`thumb-${idx}`;
+    thumb.innerHTML=`<img src="${e.target.result}" alt="${file.name}"/><button class="doc-thumb-remove" onclick="event.stopPropagation();removeDoc(${idx})">✕</button>`;
+    grid.appendChild(thumb);
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeDoc(idx){uploadedFiles.splice(idx,1);refreshThumbs();}
+function refreshThumbs(){
+  const grid=document.getElementById('docs-grid');if(!grid)return;
+  grid.innerHTML='';uploadedFiles.forEach(f=>addThumb(f));
+}
+
+/* ========== OCR ========== */
+async function handleScan(orderId){
+  if(uploadedFiles.length===0){showToast('Please upload at least one document photo','error');return;}
+  const btn=document.getElementById('scan-docs-btn');
+  btn.disabled=true;btn.innerHTML='⏳ Scanning...';
+  showProgress();
+  try{
+    const dataUrls=await Promise.all(uploadedFiles.map(fileToDataUrl));
+    const allFields={};
+    for(let i=0;i<dataUrls.length;i++){
+      const statusEl=document.getElementById('ocr-progress-text');
+      if(statusEl)statusEl.textContent=`Scanning document ${i+1} of ${dataUrls.length}...`;
+      try{
+        const worker=await Tesseract.createWorker('eng',1,{logger:m=>{if(m.status==='recognizing text')setProgress(Math.round(m.progress*100));}});
+        const{data}=await worker.recognize(dataUrls[i]);
+        await worker.terminate();
+        const extracted=extractFields(data.text);
+        for(const[k,v]of Object.entries(extracted)){if(v&&v.trim()&&(!allFields[k]||!allFields[k].trim()))allFields[k]=v;}
+      }catch(err){console.warn('OCR warn:',err);}
+    }
+    updateOrder(orderId,{extractedFields:allFields,status:'processing'});
+    const fg=document.getElementById('fields-grid');
+    if(fg){
+      const def={'Full Name':'','Date of Birth':'','Aadhaar Number':'',"Father's Name":'','Gender':'','Address':'','Phone Number':'','PAN Number':''};
+      fg.innerHTML=renderFields({...def,...allFields});
+    }
+    showToast('Documents scanned successfully!','success');
+  }catch(err){showToast('OCR failed. Try a clearer image.','error');}
+  finally{btn.disabled=false;btn.innerHTML='🔍 Run Smart Scan';hideProgress();}
+}
+
+function extractFields(text){
+  const f={'Full Name':'','Date of Birth':'','Aadhaar Number':'',"Father's Name":'','Gender':'','Address':'','Phone Number':'','PAN Number':''};
+  if(!text)return f;
+  const norm=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  const lines=norm.split('\n').map(l=>l.trim()).filter(Boolean);
+  const aam=norm.match(/\b(\d{4}\s?\d{4}\s?\d{4})\b/);
+  if(aam){const d=aam[1].replace(/\s/g,'');if(d.length===12)f['Aadhaar Number']=d.replace(/(\d{4})(\d{4})(\d{4})/,'$1 $2 $3');}
+  const dobPats=[/(?:DOB|Date\s*of\s*Birth)[:\s]*(\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4})/i,/\b(\d{2}[\/-]\d{2}[\/-]\d{4})\b/];
+  for(const p of dobPats){const m=norm.match(p);if(m){f['Date of Birth']=m[1].trim();break;}}
+  const panM=norm.match(/\b([A-Z]{5}[0-9]{4}[A-Z])\b/);if(panM)f['PAN Number']=panM[1];
+  const genM=norm.match(/\b(male|female|Male|Female|MALE|FEMALE)\b/i);
+  if(genM){const g=genM[1].toLowerCase();f['Gender']=g==='male'?'Male':'Female';}
+  for(const line of lines){
+    const nm=line.match(/(?:Name|नाम)[:\s]+(.+)/i);
+    if(nm&&!f['Full Name']){const n=nm[1].replace(/[^a-zA-Z\s.]/g,'').trim();if(n.length>=3)f['Full Name']=n.replace(/\b\w/g,l=>l.toUpperCase());}
+    const fm=line.match(/(?:Father|S\/O|D\/O|W\/O|पिता)[:\s]+(.+)/i);
+    if(fm&&!f["Father's Name"]){const fn=fm[1].replace(/[^a-zA-Z\s.]/g,'').trim();if(fn.length>=3)f["Father's Name"]=fn.replace(/\b\w/g,l=>l.toUpperCase());}
+  }
+  const mobM=norm.match(/\b([6-9]\d{9})\b/);if(mobM)f['Phone Number']=mobM[1];
+  return f;
+}
+
+function fileToDataUrl(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);});}
+function showProgress(){const c=document.getElementById('ocr-progress');if(c)c.classList.add('active');}
+function hideProgress(){const c=document.getElementById('ocr-progress');if(c)setTimeout(()=>c.classList.remove('active'),500);}
+function setProgress(p){const f=document.getElementById('ocr-progress-fill');const pe=document.getElementById('ocr-progress-percent');if(f)f.style.width=p+'%';if(pe)pe.textContent=p+'%';}
+
+/* ========== SEARCH ========== */
+let searchDebounce;
+function bindSearch(){
+  const si=document.getElementById('search-input');
+  if(!si)return;
+  si.addEventListener('input',()=>{
+    clearTimeout(searchDebounce);
+    searchDebounce=setTimeout(()=>{
+      const q=si.value.toLowerCase().trim();
+      const orders=q?getOrders().filter(o=>o.studentName.toLowerCase().includes(q)||o.service.toLowerCase().includes(q)||o.phone.includes(q)):getOrders();
+      const grid=document.getElementById('orders-grid');if(!grid)return;
+      if(orders.length===0){grid.innerHTML='<div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">🔍</div><p style="color:var(--text-secondary);">No results found</p></div>';return;}
+      grid.innerHTML=orders.map((o,i)=>{
+        const date=new Date(o.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+        return`<div class="order-row" onclick="showView('order-detail',{orderId:'${o.id}'})" style="animation-delay:${i*40}ms">
+          <div class="order-row-avatar">${getInitials(o.studentName)}</div>
+          <div class="order-row-info"><div class="order-row-name">${esc(o.studentName)}</div><div class="order-row-service">${esc(o.service)}</div></div>
+          <div class="order-row-meta"><span>📅 ${date}</span><span>📱 ${o.phone?'···'+o.phone.slice(-4):'—'}</span></div>
+          <span class="status-badge status-${o.status}">${o.status}</span>
+        </div>`;
+      }).join('');
+    },250);
+  });
+}
+
+/* ========== INIT ========== */
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('.nav-item[data-view]').forEach(item=>{
+    item.addEventListener('click',()=>showView(item.dataset.view));
+  });
+  bindSearch();
+  renderDashboard();
+  updateBadge();
+});
+</script>
+</body>
+</html>
