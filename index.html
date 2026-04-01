@@ -261,8 +261,60 @@
           <div class="form-group">
             <label class="form-label">Service Type</label>
             <select class="form-select" id="input-service">
-              <option>Exam Form</option><option>JEE (Main / Advanced)</option><option>NEET UG</option><option>Scholarship</option><option>Admission Form</option>
-              <option>PAN Card</option><option>Passport</option><option>Voter ID</option><option>Driving License</option>
+              <optgroup label="── Engineering Entrance">
+                <option>JEE Main</option>
+                <option>JEE Advanced</option>
+                <option>MHT-CET (Engineering)</option>
+                <option>BITSAT</option>
+                <option>VITEEE</option>
+                <option>COMEDK</option>
+              </optgroup>
+              <optgroup label="── Medical Entrance">
+                <option>NEET UG</option>
+                <option>NEET PG</option>
+                <option>AIIMS PG</option>
+                <option>MHT-CET (Pharmacy)</option>
+              </optgroup>
+              <optgroup label="── Law Entrance">
+                <option>CLAT</option>
+                <option>AILET</option>
+                <option>MH-CET Law</option>
+              </optgroup>
+              <optgroup label="── Management Entrance">
+                <option>CAT</option>
+                <option>MAT</option>
+                <option>CMAT</option>
+                <option>XAT</option>
+                <option>SNAP</option>
+              </optgroup>
+              <optgroup label="── Government / SSC">
+                <option>SSC CGL</option>
+                <option>SSC CHSL</option>
+                <option>SSC MTS</option>
+                <option>SSC GD</option>
+                <option>IBPS PO</option>
+                <option>IBPS Clerk</option>
+                <option>SBI PO</option>
+                <option>SBI Clerk</option>
+                <option>RRB NTPC</option>
+                <option>RRB Group D</option>
+                <option>MPSC</option>
+                <option>UPSC CSE</option>
+              </optgroup>
+              <optgroup label="── Defence">
+                <option>NDA</option>
+                <option>CDS</option>
+                <option>AFCAT</option>
+              </optgroup>
+              <optgroup label="── Other Services">
+                <option>Exam Form</option>
+                <option>Scholarship</option>
+                <option>Admission Form</option>
+                <option>PAN Card</option>
+                <option>Passport</option>
+                <option>Voter ID</option>
+                <option>Driving License</option>
+              </optgroup>
             </select>
           </div>
           <div class="form-group">
@@ -392,19 +444,75 @@
   }
 
   /* ========== WHATSAPP ========== */
-  function getDocsForService(service){
+  function getDocsArrayForService(service){
     const m={
-      'Exam Form':'1️⃣ Aadhaar Card (Front & Back)\n2️⃣ Passport Size Photo\n3️⃣ Marksheet / Grade Card\n4️⃣ Admit Card (if available)',
-      'JEE (Main / Advanced)':'1️⃣ Aadhaar Card (Front & Back)\n2️⃣ Passport Size Photo (white background)\n3️⃣ Class 10th Marksheet (DOB proof)\n4️⃣ Class 12th Marksheet or Appearing Certificate\n5️⃣ Scanned Signature on white paper\n6️⃣ PwD Certificate (if applicable)',
-      'NEET UG':'1️⃣ Aadhaar Card (Front & Back)\n2️⃣ Passport Size Photo (white background)\n3️⃣ Class 10th Marksheet (DOB proof)\n4️⃣ Class 12th Marksheet or Appearing Certificate\n5️⃣ Scanned Signature on white paper\n6️⃣ Category Certificate — SC/ST/OBC/EWS (if applicable)\n7️⃣ PwD Certificate (if applicable)',
-      'Scholarship':'1️⃣ Aadhaar Card\n2️⃣ Income Certificate\n3️⃣ Marksheet\n4️⃣ Bank Account Details\n5️⃣ Passport Size Photo',
-      'Admission Form':'1️⃣ Aadhaar Card\n2️⃣ 10th & 12th Marksheet\n3️⃣ Transfer Certificate\n4️⃣ Migration Certificate\n5️⃣ Passport Size Photo',
-      'PAN Card':'1️⃣ Aadhaar Card (Front & Back)\n2️⃣ Passport Size Photo\n3️⃣ Signature on white paper',
-      'Passport':'1️⃣ Aadhaar Card\n2️⃣ PAN Card\n3️⃣ 10th Marksheet (DOB proof)\n4️⃣ Passport Size Photo\n5️⃣ Address Proof',
-      'Voter ID':'1️⃣ Aadhaar Card\n2️⃣ Passport Size Photo\n3️⃣ Address Proof',
-      'Driving License':'1️⃣ Aadhaar Card\n2️⃣ Address Proof\n3️⃣ Passport Size Photo\n4️⃣ Age Proof (if applicable)'
+      // Engineering
+      'JEE Main':['Aadhaar Card (Front & Back)','Passport Size Photo (white background, recent)','Class 10th Marksheet (DOB proof)','Class 12th Marksheet or School Appearing Certificate','Scanned Signature on white paper','Category Certificate — SC/ST/OBC-NCL/EWS (if applicable)','PwD Certificate (if applicable)'],
+      'JEE Advanced':['JEE Main Admit Card & Scorecard','Aadhaar Card (Front & Back)','Passport Size Photo (white background)','Class 10th Marksheet','Class 12th Marksheet','Scanned Signature on white paper','Category Certificate (if applicable)','PwD Certificate (if applicable)','OCI/PIO Card (for foreign nationals)'],
+      'MHT-CET (Engineering)':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet','Class 12th Marksheet or Appearing Certificate','Scanned Signature','Domicile / Maharashtra Resident Certificate','Category Certificate (if applicable)'],
+      'BITSAT':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet','Class 12th Marksheet or School Certificate','Scanned Signature'],
+      'VITEEE':['Aadhaar Card / Passport','Passport Size Photo','Class 10th Marksheet','Class 12th Marksheet or School Certificate'],
+      'COMEDK':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet','Class 12th Marksheet','Karnataka Domicile (if applicable)','Category Certificate (if applicable)'],
+      // Medical
+      'NEET UG':['Aadhaar Card (Front & Back)','Passport Size Photo (white background, recent)','Class 10th Marksheet (DOB proof)','Class 12th Marksheet or Appearing Certificate','Scanned Signature on white paper','Category Certificate — SC/ST/OBC/EWS (if applicable)','PwD Certificate (if applicable)'],
+      'NEET PG':['MBBS Degree Certificate / Provisional','Aadhaar Card','Passport Size Photo','Medical Council Registration Certificate','Internship Completion Certificate','Category Certificate (if applicable)'],
+      'AIIMS PG':['MBBS Degree Certificate / Provisional','Aadhaar Card','Passport Size Photo','Medical Council Registration','Internship Certificate'],
+      'MHT-CET (Pharmacy)':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet','Class 12th Marksheet (PCB/PCM)','Domicile Certificate','Category Certificate (if applicable)'],
+      // Law
+      'CLAT':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet','Class 12th Marksheet or Appearing Certificate','Scanned Signature','Category Certificate (if applicable)','PwD Certificate (if applicable)'],
+      'AILET':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet','Class 12th Marksheet or School Certificate','Scanned Signature'],
+      'MH-CET Law':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet','Class 12th Marksheet','Maharashtra Domicile Certificate','Category Certificate (if applicable)'],
+      // Management
+      'CAT':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree / Provisional Certificate','Marksheets of all graduation years','Scanned Signature','Category Certificate (if applicable)'],
+      'MAT':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree or Appearing Certificate','Marksheets'],
+      'CMAT':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree / Provisional','Marksheets','Category Certificate (if applicable)'],
+      'XAT':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree or Appearing Certificate','Scanned Signature'],
+      'SNAP':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree or Appearing Certificate','Marksheets'],
+      // SSC / Banking
+      'SSC CGL':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet & Certificate','Graduation Degree / Marksheets','Scanned Signature on white paper','Category Certificate (if applicable)','Ex-Serviceman / PwD Certificate (if applicable)'],
+      'SSC CHSL':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet','Class 12th Marksheet & Certificate','Scanned Signature','Category Certificate (if applicable)'],
+      'SSC MTS':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet & Passing Certificate','Scanned Signature','Category Certificate (if applicable)'],
+      'SSC GD':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet & Certificate','Domicile / Resident Certificate','Category Certificate (if applicable)','NCC Certificate (if applicable)'],
+      'IBPS PO':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree / Provisional Certificate','Class 10th & 12th Marksheets','Scanned Signature','Category Certificate (if applicable)'],
+      'IBPS Clerk':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree or Appearing Certificate','Class 12th Marksheet','Scanned Signature','Category Certificate (if applicable)'],
+      'SBI PO':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree / Provisional','All Graduation Marksheets','Scanned Signature','Category Certificate (if applicable)'],
+      'SBI Clerk':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree or Appearing Certificate','Class 12th Marksheet','Scanned Signature','Category Certificate (if applicable)'],
+      'RRB NTPC':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th & 12th Marksheet & Certificate','Graduation Degree (if applicable)','Scanned Signature','Category Certificate (if applicable)','Ex-Serviceman Certificate (if applicable)'],
+      'RRB Group D':['Aadhaar Card (Front & Back)','Passport Size Photo','Class 10th Marksheet & Certificate','ITI / NCVT Certificate (if applicable)','Scanned Signature','Category Certificate (if applicable)'],
+      'MPSC':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree / Marksheets','Domicile Certificate (Maharashtra)','Caste Certificate (if applicable)','Caste Validity Certificate','Non-Creamy Layer Certificate (OBC)','PwD Certificate (if applicable)'],
+      'UPSC CSE':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree / Provisional Certificate','Class 10th Certificate (DOB proof)','Scanned Signature on white paper','Category Certificate (if applicable)','PwD Certificate (if applicable)','Ex-Serviceman Certificate (if applicable)'],
+      // Defence
+      'NDA':['Aadhaar Card (Front & Back)','Passport Size Photo (white background)','Class 10th Marksheet (DOB proof)','Class 12th Marksheet or Appearing Certificate','Domicile / Resident Certificate','Scanned Signature'],
+      'CDS':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree / Provisional Certificate','Class 10th & 12th Marksheets','Scanned Signature','Domicile Certificate'],
+      'AFCAT':['Aadhaar Card (Front & Back)','Passport Size Photo','Graduation Degree / Provisional Certificate','All Graduation Marksheets','Class 10th & 12th Marksheets','Scanned Signature'],
+      // General
+      'Exam Form':['Aadhaar Card (Front & Back)','Passport Size Photo','Marksheet / Grade Card','Admit Card (if available)'],
+      'Scholarship':['Aadhaar Card','Income Certificate','Marksheet','Bank Account Details (Passbook first page)','Passport Size Photo'],
+      'Admission Form':['Aadhaar Card','10th & 12th Marksheet','Transfer Certificate','Migration Certificate','Passport Size Photo'],
+      'PAN Card':['Aadhaar Card (Front & Back)','Passport Size Photo','Signature on white paper'],
+      'Passport':['Aadhaar Card','PAN Card','10th Marksheet (DOB proof)','Passport Size Photo','Address Proof'],
+      'Voter ID':['Aadhaar Card','Passport Size Photo','Address Proof'],
+      'Driving License':['Aadhaar Card','Address Proof','Passport Size Photo','Age Proof (if applicable)']
     };
-    return m[service]||'1️⃣ Aadhaar Card\n2️⃣ Passport Size Photo\n3️⃣ Any relevant documents';
+    return m[service]||['Aadhaar Card','Passport Size Photo','Any relevant documents'];
+  }
+
+  function getDocsForService(service){
+    return getDocsArrayForService(service).map((d,i)=>`${i+1}️⃣ ${d}`).join('\n');
+  }
+
+  function renderDocChecklist(service){
+    const docs=getDocsArrayForService(service);
+    return`<div class="detail-card" style="margin-bottom:28px;">
+      <h3 class="section-title" style="margin-bottom:16px;">📋 Required Documents</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        ${docs.map((d,i)=>`
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg-primary);border-radius:var(--radius-full);font-size:14px;font-weight:500;">
+            <span style="width:28px;height:28px;border-radius:50%;background:var(--accent-lime);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;">${i+1}</span>
+            <span>${esc(d)}</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
   }
 
   /* ========== ORDER DETAIL ========== */
@@ -433,6 +541,7 @@
         </div>
       </div>
       ${order.notes?`<div class="detail-card" style="margin-bottom:28px;padding:20px 28px;"><strong>📝 Notes:</strong> ${esc(order.notes)}</div>`:''}
+      ${renderDocChecklist(order.service)}
       <div style="text-align:center;margin-bottom:36px;">
         <a href="${waLink}" target="_blank" class="btn btn-whatsapp" style="font-size:16px;padding:16px 36px;box-shadow:0 12px 32px rgba(78,203,113,0.4);text-decoration:none;">
           💬 Request Documents via WhatsApp
